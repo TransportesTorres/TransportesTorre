@@ -126,13 +126,30 @@ export default function RegisterForm({ onToggleForm }: RegisterFormProps) {
       <div className="p-8">
         <div className="text-center">
           <div className="mx-auto w-16 h-16 bg-gradient-to-br from-green-100 to-blue-100 rounded-full flex items-center justify-center mb-6">
-            <CheckCircleIcon className="h-10 w-10 text-green-600" />
+            <svg className="h-10 w-10 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
           </div>
           <h2 className="text-2xl font-bold text-gray-900 mb-4">¡Registro Exitoso!</h2>
           <p className="text-gray-600 mb-6">
             Tu cuenta ha sido creada correctamente. <br />
-            Ahora puedes iniciar sesión con tus credenciales.
+            <strong>Revisa tu email</strong> para confirmar tu cuenta y poder iniciar sesión.
           </p>
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+            <div className="flex items-start">
+              <svg className="h-5 w-5 text-blue-600 mr-3 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <div className="text-left">
+                <p className="text-sm font-medium text-blue-800 mb-1">
+                  Verifica tu bandeja de entrada
+                </p>
+                <p className="text-sm text-blue-700">
+                  Hemos enviado un enlace de confirmación a tu email. Haz clic en el enlace para activar tu cuenta.
+                </p>
+              </div>
+            </div>
+          </div>
           <div className="flex items-center justify-center">
             <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mr-3"></div>
             <p className="text-blue-600 font-medium">Redirigiendo al inicio de sesión...</p>

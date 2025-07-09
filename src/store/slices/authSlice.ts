@@ -192,6 +192,26 @@ export const changePassword = createAsyncThunk(
   }
 );
 
+export const resendConfirmation = createAsyncThunk(
+  'auth/resendConfirmation',
+  async (email: string, { rejectWithValue }) => {
+    try {
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: email,
+      });
+
+      if (error) {
+        return rejectWithValue(error.message);
+      }
+
+      return { success: true };
+    } catch (error) {
+      return rejectWithValue('Error al reenviar el email de confirmación');
+    }
+  }
+);
+
 const authSlice = createSlice({
   name: 'auth',
   initialState,
