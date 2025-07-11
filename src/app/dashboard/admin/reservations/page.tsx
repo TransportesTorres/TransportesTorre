@@ -102,7 +102,7 @@ export default function ReservationsManagement() {
   useEffect(() => {
     if (user && user.role === 'admin') {
       // Obtener todas las reservas para el admin
-      dispatch(fetchReservations(undefined));
+      dispatch(fetchReservations({}));
     }
   }, [dispatch, user]);
 
@@ -192,7 +192,7 @@ export default function ReservationsManagement() {
         }
         
         // Recargar la lista de reservas
-        await dispatch(fetchReservations());
+        await dispatch(fetchReservations({}));
       } else {
         setToast({
           message: result.error || 'Error al actualizar la reserva',
