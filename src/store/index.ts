@@ -3,12 +3,14 @@ import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
 import authReducer from './slices/authSlice';
 import tripsReducer from './slices/tripsSlice';
 import reservationsReducer from './slices/reservationsSlice';
+import driversReducer from './slices/driversSlice';
 
 export const store = configureStore({
   reducer: {
     auth: authReducer,
     trips: tripsReducer,
     reservations: reservationsReducer,
+    drivers: driversReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

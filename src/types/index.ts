@@ -75,7 +75,7 @@ export interface Trip {
 
 export interface Reservation {
   id: string;
-  trip_id: string;
+  trip_id?: string | null; // Opcional para solicitudes pendientes
   user_id: string;
   trip?: Trip;
   user?: User;
@@ -97,6 +97,28 @@ export interface Reservation {
   confirmation_code: string;
   created_at: string;
   updated_at: string;
+  
+  // Nuevos campos para solicitudes detalladas
+  company_name?: string;
+  requester_name?: string;
+  requester_email?: string;
+  flight_type?: 'nacional' | 'internacional';
+  service_date?: string;
+  pickup_time?: string;
+  luggage_hand?: number;
+  luggage_checked?: number;
+  additional_services?: string;
+  
+  // Campos para almacenar datos de solicitud de viaje
+  trip_request_origin?: string;
+  trip_request_destination?: string;
+  trip_request_departure_time?: string;
+  trip_request_estimated_duration?: number;
+  trip_request_service_type_id?: string;
+  trip_request_vehicle_category?: string;
+  trip_request_includes_tolls?: boolean;
+  trip_request_includes_parking?: boolean;
+  trip_request_gps_tracking?: boolean;
 }
 
 export interface Package {

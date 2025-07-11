@@ -103,7 +103,7 @@ export default function ClientReservations() {
   useEffect(() => {
     if (user && user.role === 'client') {
       // Obtener solo las reservas del cliente
-      dispatch(fetchReservations(user.id));
+      dispatch(fetchReservations({ userId: user.id }));
     }
   }, [dispatch, user]);
 

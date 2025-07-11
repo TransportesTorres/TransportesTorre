@@ -256,7 +256,7 @@ function generateEmailTemplate(templateName: string, data: SimpleReservationData
               <div class="content">
                   <div class="status">
                       <h3>📋 Código de Reserva: ${data.confirmation_code}</h3>
-                      <p>Estado: <strong>Confirmado - Listo para ejecutar</strong></p>
+                      <p>Estado: <strong>Confirmado - Listo para aprobar</strong></p>
                   </div>
                   
                   <div class="info-box">
