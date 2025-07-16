@@ -7,6 +7,7 @@ import { fetchReservations, updateReservationStatus } from '@/store/slices/reser
 import { fetchTrips } from '@/store/slices/tripsSlice';
 import { fetchDrivers } from '@/store/slices/driversSlice';
 import { logoutUser } from '@/store/slices/authSlice';
+import { downloadExcelReport } from '@/lib/excelReports';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import Toast from '@/components/ui/Toast';
 
@@ -203,6 +204,35 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleDownloadReport = async () => {
+    try {
+      setToast({
+        message: 'Generando reporte de Excel...',
+        type: 'info'
+      });
+
+      // Preparar datos para el reporte
+      const reportData = {
+        reservations: reservations,
+        trips: trips,
+        drivers: drivers
+      };
+
+      // Generar y descargar el reporte
+      downloadExcelReport(reportData);
+
+      setToast({
+        message: 'Reporte descargado exitosamente',
+        type: 'success'
+      });
+    } catch (error: any) {
+      setToast({
+        message: error.message || 'Error al generar el reporte',
+        type: 'error'
+      });
+    }
+  };
+
   const formatDate = (dateString: string | undefined) => {
     if (!dateString) return 'No especificada';
     return new Date(dateString).toLocaleDateString('es-ES', {
@@ -265,6 +295,18 @@ export default function AdminDashboard() {
                 <div className="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-medium">
                   {pendingRequests.length} solicitudes pendientes
                 </div>
+                
+                {/* Download Report Button */}
+                <button
+                  onClick={handleDownloadReport}
+                  className="flex items-center space-x-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+                  title="Descargar reporte detallado en Excel"
+                >
+                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  <span className="hidden sm:inline text-sm font-medium">Descargar Excel</span>
+                </button>
                 
                 {/* User info and logout */}
                 <div className="flex items-center space-x-3">
@@ -343,6 +385,38 @@ export default function AdminDashboard() {
                 <div className="ml-4">
                   <p className="text-sm font-medium text-gray-500">Conductores Disponibles</p>
                   <p className="text-2xl font-bold text-gray-900">{drivers.length}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Acciones Rápidas */}
+          <div className="mb-8">
+            <div className="bg-white rounded-xl shadow-sm border p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Reportes y Exportación</h3>
+                  <p className="text-sm text-gray-500">
+                    Descarga reportes detallados con toda la información del sistema
+                  </p>
+                </div>
+                <div className="flex space-x-3">
+                  <button
+                    onClick={handleDownloadReport}
+                    className="flex items-center space-x-2 bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors shadow-sm"
+                  >
+                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <span className="font-medium">Reporte Completo Excel</span>
+                  </button>
+                  <div className="text-xs text-gray-400 flex items-center">
+                    <div>
+                      <div>• Todas las reservas</div>
+                      <div>• Estadísticas mensuales</div>
+                      <div>• Información de conductores</div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
