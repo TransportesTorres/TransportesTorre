@@ -121,7 +121,6 @@ export default function ClientTripRequest() {
     
     // Datos técnicos del viaje
     estimated_duration: 60,
-    service_type_id: '',
     vehicle_category: 'sedan_ejecutivo' as const,
     includes_tolls: true,
     includes_parking: true,
@@ -208,14 +207,11 @@ export default function ClientTripRequest() {
     if (!formData.service_date) newErrors.service_date = 'La fecha del servicio es requerida';
     if (!formData.pickup_time) newErrors.pickup_time = 'La hora de recogida es requerida';
     
-    // Ubicaciones
-    if (!formData.pickup_location.trim()) newErrors.pickup_location = 'La dirección de recogida es requerida';
-    if (!formData.dropoff_location.trim()) newErrors.dropoff_location = 'La dirección de destino es requerida';
+    // Ubicaciones (opcionales)
+    // pickup_location y dropoff_location son opcionales
     
-    // Información del viaje
-    if (!formData.origin.trim()) newErrors.origin = 'El origen es requerido';
-    if (!formData.destination.trim()) newErrors.destination = 'El destino es requerido';
-    if (!formData.service_type_id) newErrors.service_type_id = 'El tipo de servicio es requerido';
+    // Información del viaje (opcional)
+    // origin y destination son opcionales para referencias
     
     // Pasajeros
     if (formData.passenger_count <= 0) newErrors.passenger_count = 'El número de pasajeros debe ser mayor a 0';
@@ -239,12 +235,14 @@ export default function ClientTripRequest() {
 
     setIsSubmitting(true);
     try {
-      // Obtener precio base del tipo de servicio
-      const selectedServiceType = serviceTypes.find(st => st.id === formData.service_type_id);
-      const basePrice = selectedServiceType?.base_price || 0;
+      // Usar precio base estándar para traslados
+      const basePrice = 25000; // Precio base estándar
       
       // Calcular precio total estimado
       const estimatedPrice = basePrice * formData.passenger_count;
+
+      // Obtener el primer tipo de servicio disponible o usar un ID por defecto
+      const defaultServiceTypeId = serviceTypes.length > 0 ? serviceTypes[0].id : undefined;
 
       // Crear la solicitud de viaje
       const requestData = {
@@ -255,8 +253,8 @@ export default function ClientTripRequest() {
         passenger_count: formData.passenger_count,
         passenger_names: formData.passenger_names.filter(name => name.trim() !== ''),
         total_price: estimatedPrice,
-        pickup_location: formData.pickup_location,
-        dropoff_location: formData.dropoff_location,
+        pickup_location: formData.pickup_location || 'Por definir',
+        dropoff_location: formData.dropoff_location || 'Por definir',
         special_requirements: formData.special_requirements,
         contact_phone: formData.contact_phone,
         flight_number: formData.flight_number || undefined,
@@ -275,11 +273,11 @@ export default function ClientTripRequest() {
         additional_services: formData.additional_services || undefined,
         
         // Datos del viaje solicitado (para crear el trip cuando se apruebe)
-        trip_request_origin: formData.origin,
-        trip_request_destination: formData.destination,
+        trip_request_origin: formData.origin || 'Por definir',
+        trip_request_destination: formData.destination || 'Por definir',
         trip_request_departure_time: `${formData.service_date}T${formData.pickup_time}:00.000Z`,
         trip_request_estimated_duration: formData.estimated_duration,
-        trip_request_service_type_id: formData.service_type_id,
+        trip_request_service_type_id: defaultServiceTypeId,
         trip_request_vehicle_category: formData.vehicle_category,
         trip_request_includes_tolls: formData.includes_tolls,
         trip_request_includes_parking: formData.includes_parking,
@@ -536,11 +534,14 @@ export default function ClientTripRequest() {
                   <MapPinIcon className="h-5 w-5 mr-2 text-blue-600" />
                   Ubicaciones
                 </h3>
+                <p className="text-sm text-gray-600 mb-4">
+                  Proporciona las direcciones si las tienes disponibles. Estos campos son opcionales y pueden definirse posteriormente.
+                </p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Dirección de recogida */}
                   <div>
                     <label htmlFor="pickup_location" className="block text-sm font-medium text-gray-700 mb-2">
-                      🏠 Dirección de Recogida *
+                      🏠 Dirección de Recogida
                     </label>
                     <input
                       type="text"
@@ -559,7 +560,7 @@ export default function ClientTripRequest() {
                   {/* Dirección de destino */}
                   <div>
                     <label htmlFor="dropoff_location" className="block text-sm font-medium text-gray-700 mb-2">
-                      📍 Dirección de Destino *
+                      📍 Dirección de Destino
                     </label>
                     <input
                       type="text"
@@ -578,7 +579,7 @@ export default function ClientTripRequest() {
                   {/* Origen (referencia) */}
                   <div>
                     <label htmlFor="origin" className="block text-sm font-medium text-gray-700 mb-2">
-                      Origen (referencia) *
+                      Origen (referencia)
                     </label>
                     <input
                       type="text"
@@ -597,7 +598,7 @@ export default function ClientTripRequest() {
                   {/* Destino (referencia) */}
                   <div>
                     <label htmlFor="destination" className="block text-sm font-medium text-gray-700 mb-2">
-                      Destino (referencia) *
+                      Destino (referencia)
                     </label>
                     <input
                       type="text"
@@ -668,29 +669,7 @@ export default function ClientTripRequest() {
                     )}
                   </div>
 
-                  {/* Tipo de servicio */}
-                  <div>
-                    <label htmlFor="service_type_id" className="block text-sm font-medium text-gray-700 mb-2">
-                      Tipo de Servicio *
-                    </label>
-                    <select
-                      id="service_type_id"
-                      name="service_type_id"
-                      value={formData.service_type_id}
-                      onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
-                    >
-                      <option value="">Seleccionar tipo de servicio</option>
-                      {serviceTypes.map((serviceType) => (
-                        <option key={serviceType.id} value={serviceType.id}>
-                          {serviceType.name} - ${serviceType.base_price.toLocaleString()}
-                        </option>
-                      ))}
-                    </select>
-                    {errors.service_type_id && (
-                      <p className="text-red-600 text-sm mt-1">{errors.service_type_id}</p>
-                    )}
-                  </div>
+                  {/* Tipo de servicio - REMOVIDO: Los clientes no seleccionan tipo de servicio */}
                 </div>
 
                 {/* Nombres de pasajeros */}

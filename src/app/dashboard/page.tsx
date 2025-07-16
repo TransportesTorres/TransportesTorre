@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAppSelector, useAppDispatch } from '@/store';
 import { getCurrentUser } from '@/store/slices/authSlice';
@@ -9,10 +9,12 @@ export default function DashboardPage() {
   const { user, isLoading } = useAppSelector((state) => state.auth);
   const dispatch = useAppDispatch();
   const router = useRouter();
+  const hasAttemptedAuth = useRef(false);
 
   useEffect(() => {
     // Si no hay usuario, intentar obtenerlo
-    if (!user && !isLoading) {
+    if (!user && !isLoading && !hasAttemptedAuth.current) {
+      hasAttemptedAuth.current = true;
       dispatch(getCurrentUser());
     }
   }, [user, isLoading, dispatch]);
@@ -29,7 +31,7 @@ export default function DashboardPage() {
   }, [user, router]);
 
   // Mostrar loading mientras determinamos el rol
-  if (isLoading || !user) {
+  if (isLoading || (!user && !hasAttemptedAuth.current)) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
         <div className="text-center">
@@ -38,6 +40,12 @@ export default function DashboardPage() {
         </div>
       </div>
     );
+  }
+
+  // Si no hay usuario después de verificar, redirigir al login
+  if (!user) {
+    router.push('/auth?mode=login');
+    return null;
   }
 
   // Si el usuario no tiene rol válido, mostrar error
@@ -66,4 +74,4 @@ export default function DashboardPage() {
   }
 
   return null;
-} 
+}; 

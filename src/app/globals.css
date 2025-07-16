@@ -24,3 +24,42 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Estilos para mejorar legibilidad de inputs en móviles */
+@media screen and (max-width: 768px) {
+  input[type="email"],
+  input[type="password"],
+  input[type="text"],
+  input[type="tel"] {
+    color: #111827 !important; /* text-gray-900 */
+    -webkit-text-fill-color: #111827 !important;
+    -webkit-opacity: 1 !important;
+    opacity: 1 !important;
+  }
+  
+  input[type="email"]::-webkit-input-placeholder,
+  input[type="password"]::-webkit-input-placeholder,
+  input[type="text"]::-webkit-input-placeholder,
+  input[type="tel"]::-webkit-input-placeholder {
+    color: #6b7280 !important; /* text-gray-500 */
+    -webkit-text-fill-color: #6b7280 !important;
+    opacity: 1 !important;
+  }
+  
+  input[type="email"]::-moz-placeholder,
+  input[type="password"]::-moz-placeholder,
+  input[type="text"]::-moz-placeholder,
+  input[type="tel"]::-moz-placeholder {
+    color: #6b7280 !important;
+    opacity: 1 !important;
+  }
+}
+
+/* Asegurar que los inputs tengan buen contraste en todos los dispositivos */
+input[type="email"],
+input[type="password"],
+input[type="text"],
+input[type="tel"] {
+  color: #111827; /* text-gray-900 */
+  -webkit-text-fill-color: #111827;
+}

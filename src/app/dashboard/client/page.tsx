@@ -84,11 +84,14 @@ export default function ClientDashboard() {
   }, [user, dispatch, router]);
 
   const handleLogout = async () => {
-    try {
-      await dispatch(logoutUser()).unwrap();
-      router.push('/');
-    } catch (error) {
-      console.error('Error al cerrar sesión:', error);
+    if (confirm('¿Estás seguro de que quieres cerrar sesión?')) {
+      try {
+        await dispatch(logoutUser()).unwrap();
+        // Redirigir inmediatamente usando window.location
+        window.location.href = '/auth?mode=login';
+      } catch (error) {
+        console.error('Error al cerrar sesión:', error);
+      }
     }
   };
 

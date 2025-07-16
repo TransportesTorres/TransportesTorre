@@ -137,7 +137,7 @@ export const createReservation = createAsyncThunk(
         };
 
         // Enviar correo al admin (puedes configurar el email del admin aquí)
-        const adminEmail = 'joseeduardorodriguesgodinho@gmail.com'; // Email para pruebas
+        const adminEmail = 'torres.transportes.spa@gmail.com'; // Email para pruebas
         
         await fetch('/api/email/send-simple', {
           method: 'POST',

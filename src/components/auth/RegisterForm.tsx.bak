@@ -256,7 +256,7 @@ export default function RegisterForm({ onToggleForm }: RegisterFormProps) {
                 })}
                 onFocus={() => setFocusedField('email')}
                 onBlur={() => setFocusedField(null)}
-                className={`w-full pl-10 pr-4 py-3 border rounded-xl shadow-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 ${
+                className={`w-full pl-10 pr-4 py-3 border rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 ${
                   errors.email
                     ? 'border-red-300 focus:ring-red-500 bg-red-50'
                     : focusedField === 'email'
@@ -292,7 +292,7 @@ export default function RegisterForm({ onToggleForm }: RegisterFormProps) {
                 {...register('phone')}
                 onFocus={() => setFocusedField('phone')}
                 onBlur={() => setFocusedField(null)}
-                className={`w-full pl-10 pr-4 py-3 border rounded-xl shadow-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 ${
+                className={`w-full pl-10 pr-4 py-3 border rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 ${
                   focusedField === 'phone'
                     ? 'border-blue-300 focus:ring-blue-500 bg-blue-50'
                     : 'border-gray-300 focus:ring-blue-500 bg-white hover:border-gray-400'
@@ -324,7 +324,7 @@ export default function RegisterForm({ onToggleForm }: RegisterFormProps) {
                 })}
                 onFocus={() => setFocusedField('password')}
                 onBlur={() => setFocusedField(null)}
-                className={`w-full pl-10 pr-12 py-3 border rounded-xl shadow-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 ${
+                className={`w-full pl-10 pr-12 py-3 border rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 ${
                   errors.password
                     ? 'border-red-300 focus:ring-red-500 bg-red-50'
                     : focusedField === 'password'
@@ -371,7 +371,7 @@ export default function RegisterForm({ onToggleForm }: RegisterFormProps) {
                 })}
                 onFocus={() => setFocusedField('confirmPassword')}
                 onBlur={() => setFocusedField(null)}
-                className={`w-full pl-10 pr-4 py-3 border rounded-xl shadow-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 ${
+                className={`w-full pl-10 pr-4 py-3 border rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 ${
                   errors.confirmPassword
                     ? 'border-red-300 focus:ring-red-500 bg-red-50'
                     : focusedField === 'confirmPassword'

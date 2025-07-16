@@ -1,10 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAppDispatch, useAppSelector } from '@/store';
 import { fetchReservations, updateReservationStatus } from '@/store/slices/reservationsSlice';
 import { fetchTrips } from '@/store/slices/tripsSlice';
 import { fetchDrivers } from '@/store/slices/driversSlice';
+import { logoutUser } from '@/store/slices/authSlice';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import Toast from '@/components/ui/Toast';
 
@@ -76,11 +78,19 @@ const MailIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
+const LogoutIcon = ({ className }: { className?: string }) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+  </svg>
+);
+
 export default function AdminDashboard() {
   const { reservations, isLoading } = useAppSelector((state) => state.reservations);
   const { trips } = useAppSelector((state) => state.trips);
   const { drivers, isLoading: driversLoading } = useAppSelector((state) => state.drivers);
+  const { user } = useAppSelector((state) => state.auth);
   const dispatch = useAppDispatch();
+  const router = useRouter();
 
   const [selectedRequest, setSelectedRequest] = useState<any>(null);
   const [showApprovalModal, setShowApprovalModal] = useState(false);
@@ -177,6 +187,22 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleLogout = async () => {
+    if (confirm('¿Estás seguro de que quieres cerrar sesión?')) {
+      try {
+        await dispatch(logoutUser()).unwrap();
+        // No mostrar toast aquí para evitar loops
+        // Redirigir inmediatamente
+        window.location.href = '/auth?mode=login';
+      } catch (error: any) {
+        setToast({
+          message: error.message || 'Error al cerrar sesión',
+          type: 'error'
+        });
+      }
+    }
+  };
+
   const formatDate = (dateString: string | undefined) => {
     if (!dateString) return 'No especificada';
     return new Date(dateString).toLocaleDateString('es-ES', {
@@ -238,6 +264,26 @@ export default function AdminDashboard() {
               <div className="flex items-center space-x-4">
                 <div className="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-medium">
                   {pendingRequests.length} solicitudes pendientes
+                </div>
+                
+                {/* User info and logout */}
+                <div className="flex items-center space-x-3">
+                  <div className="text-right hidden sm:block">
+                    <div className="text-sm font-medium text-gray-900">
+                      {user?.full_name || 'Administrador'}
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      {user?.email}
+                    </div>
+                  </div>
+                  <button
+                    onClick={handleLogout}
+                    className="flex items-center space-x-2 text-gray-600 hover:text-red-600 transition-colors p-2 rounded-lg hover:bg-gray-100"
+                    title="Cerrar sesión"
+                  >
+                    <LogoutIcon className="h-5 w-5" />
+                    <span className="text-sm font-medium hidden sm:inline">Cerrar Sesión</span>
+                  </button>
                 </div>
               </div>
             </div>
