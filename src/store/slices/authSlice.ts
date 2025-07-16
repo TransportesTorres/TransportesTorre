@@ -90,6 +90,11 @@ export const logoutUser = createAsyncThunk(
       if (error) {
         return rejectWithValue(error.message);
       }
+      // Limpiar cualquier dato de sesión local
+      if (typeof window !== 'undefined') {
+        localStorage.clear();
+        sessionStorage.clear();
+      }
       return null;
     } catch (error) {
       return rejectWithValue('Error al cerrar sesión');
