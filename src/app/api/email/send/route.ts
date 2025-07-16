@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import emailService from '@/lib/emailService';
 
+// Force this route to be dynamic
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: NextRequest) {
   try {
     const { reservationId, templateName, recipientEmail } = await request.json();

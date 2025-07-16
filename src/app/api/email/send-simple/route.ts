@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
 
+// Force this route to be dynamic
+export const dynamic = 'force-dynamic';
+
 interface SimpleReservationData {
   client_name: string;
   client_email?: string;
