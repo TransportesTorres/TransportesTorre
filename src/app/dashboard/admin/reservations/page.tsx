@@ -536,10 +536,6 @@ export default function ReservationsManagement() {
                       <p className="text-sm font-medium text-gray-700">Número de Pasajeros</p>
                       <p className="text-gray-900">{selectedReservation.passenger_count}</p>
                     </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-700">Precio Total</p>
-                      <p className="text-gray-900 font-semibold">{formatPrice(selectedReservation.total_price)}</p>
-                    </div>
                   </div>
                 </div>
 

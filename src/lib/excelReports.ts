@@ -9,34 +9,103 @@ interface ReportData {
 export const generateDetailedReport = (data: ReportData) => {
   const { reservations, trips, drivers } = data;
   
+  // Debug: Verificar los datos recibidos
+  console.log('🔍 Excel Generator Debug:');
+  console.log('Reservations received:', reservations.length);
+  console.log('Trips received:', trips.length);
+  console.log('Drivers received:', drivers.length);
+  
+  // Debug: Mostrar estructura de cada tipo de dato
+  if (reservations.length > 0) {
+    console.log('🔍 Sample reservation structure:', Object.keys(reservations[0]));
+    console.log('🔍 First reservation:', reservations[0]);
+  }
+  if (trips.length > 0) {
+    console.log('🔍 Sample trip structure:', Object.keys(trips[0]));
+    console.log('🔍 First trip:', trips[0]);
+  }
+  if (drivers.length > 0) {
+    console.log('🔍 Sample driver structure:', Object.keys(drivers[0]));
+    console.log('🔍 First driver:', drivers[0]);
+  }
+  
   // Crear un nuevo workbook
   const workbook = XLSX.utils.book_new();
 
   // === HOJA 1: RESERVAS ===
-  const reservationsData = reservations.map((reservation, index) => ({
-    'N°': index + 1,
-    'ID Reserva': reservation.id,
-    'Cliente': reservation.profiles?.full_name || reservation.requester_name || 'N/A',
-    'Email': reservation.profiles?.email || 'N/A',
-    'Teléfono': reservation.contact_phone || 'N/A',
-    'Fecha Solicitud': reservation.created_at ? new Date(reservation.created_at).toLocaleDateString('es-CL') : 'N/A',
-    'Fecha Viaje': reservation.trip_date ? new Date(reservation.trip_date).toLocaleDateString('es-CL') : 'N/A',
-    'Hora': reservation.trip_time || 'N/A',
-    'Origen': reservation.pickup_location || 'Por definir',
-    'Destino': reservation.dropoff_location || 'Por definir',
-    'Pasajeros': reservation.passenger_count || 0,
-    'Equipaje de Mano': reservation.hand_luggage_count || 0,
-    'Bodega': reservation.luggage_count || 0,
-    'Estado': reservation.status === 'pending' ? 'Pendiente' : 
-              reservation.status === 'confirmed' ? 'Confirmado' : 
-              reservation.status === 'rejected' ? 'Rechazado' :
-              reservation.status === 'completed' ? 'Completado' : reservation.status,
-    'Conductor Asignado': reservation.trips?.drivers?.full_name || 'No asignado',
-    'Teléfono Conductor': reservation.trips?.drivers?.phone || 'N/A',
-    'Vehículo': reservation.trips?.drivers?.vehicle_info || 'N/A',
-    'Notas': reservation.notes || 'Sin notas',
-    'Tipo Servicio': reservation.service_types?.name || 'Por definir'
-  }));
+  const reservationsData = reservations.map((reservation, index) => {
+    // Debug: Información de cada reserva
+    if (index < 3) { // Solo mostrar las primeras 3 para no saturar el log
+      console.log(`🔍 Procesando reserva ${index + 1}:`, {
+        id: reservation.id,
+        trip_id: reservation.trip_id,
+        status: reservation.status,
+        confirmation_code: reservation.confirmation_code
+      });
+    }
+    
+    // Buscar el trip asociado a esta reserva
+    const associatedTrip = trips.find(trip => trip.id === reservation.trip_id);
+    
+    if (index < 3) {
+      console.log(`🔍 Trip encontrado para reserva ${index + 1}:`, associatedTrip ? {
+        id: associatedTrip.id,
+        driver_id: associatedTrip.driver_id,
+        status: associatedTrip.status
+      } : 'No encontrado');
+    }
+    
+    // Buscar el conductor asociado al trip
+    // Los trips vienen con el objeto driver incluido desde Supabase
+    const associatedDriver = associatedTrip?.driver || null;
+
+    if (index < 3) {
+      console.log(`🔍 Driver encontrado para reserva ${index + 1}:`, associatedDriver ? {
+        id: associatedDriver.id,
+        full_name: associatedDriver.full_name,
+        phone: associatedDriver.phone
+      } : 'No encontrado');
+      console.log(`🔍 Trip completo:`, associatedTrip);
+    }
+
+    // Formatear información del vehículo
+    const vehicleInfo = associatedDriver?.vehicle_info 
+      ? (typeof associatedDriver.vehicle_info === 'object' 
+         ? `${associatedDriver.vehicle_info.brand} ${associatedDriver.vehicle_info.model} ${associatedDriver.vehicle_info.year} - ${associatedDriver.vehicle_info.plate}`
+         : associatedDriver.vehicle_info)
+      : 'N/A';
+
+    return {
+      'N°': index + 1,
+      'ID Reserva': reservation.id,
+      'Código': reservation.confirmation_code || 'N/A',
+      'Cliente': reservation.profiles?.full_name || reservation.requester_name || 'N/A',
+      'Email': reservation.profiles?.email || reservation.requester_email || 'N/A',
+      'Teléfono': reservation.contact_phone || 'N/A',
+      'Empresa': reservation.company_name || 'N/A',
+      'Fecha Solicitud': reservation.created_at ? new Date(reservation.created_at).toLocaleDateString('es-CL') : 'N/A',
+      'Fecha Viaje': reservation.service_date ? new Date(reservation.service_date).toLocaleDateString('es-CL') : 'N/A',
+      'Hora': reservation.pickup_time || 'N/A',
+      'Origen': reservation.pickup_location || 'Por definir',
+      'Destino': reservation.dropoff_location || 'Por definir',
+      'Pasajeros': reservation.passenger_count || 0,
+      'Equipaje de Mano': reservation.luggage_hand || 0,
+      'Bodega': reservation.luggage_checked || 0,
+      'Vuelo': reservation.flight_number || 'N/A',
+      'Tipo Vuelo': reservation.flight_type || 'N/A',
+      'Estado': reservation.status === 'pending' ? 'Pendiente' : 
+                reservation.status === 'confirmed' ? 'Confirmado' : 
+                reservation.status === 'assign_driver' ? 'Esperando Conductor' :
+                reservation.status === 'rejected' ? 'Rechazado' :
+                reservation.status === 'completed' ? 'Completado' : reservation.status,
+      'Conductor Asignado': associatedDriver?.full_name || 'No asignado',
+      'Teléfono Conductor': associatedDriver?.phone || 'N/A',
+      'Email Conductor': associatedDriver?.email || 'N/A',
+      'Vehículo': vehicleInfo,
+      'Requerimientos Especiales': reservation.special_requirements || 'Ninguno',
+      'Servicios Adicionales': reservation.additional_services || 'Ninguno'
+    };
+  });
 
   const reservationsSheet = XLSX.utils.json_to_sheet(reservationsData);
   
@@ -44,9 +113,11 @@ export const generateDetailedReport = (data: ReportData) => {
   const reservationsColWidths = [
     { wch: 5 },   // N°
     { wch: 12 },  // ID Reserva
+    { wch: 12 },  // Código
     { wch: 20 },  // Cliente
     { wch: 25 },  // Email
     { wch: 15 },  // Teléfono
+    { wch: 20 },  // Empresa
     { wch: 12 },  // Fecha Solicitud
     { wch: 12 },  // Fecha Viaje
     { wch: 8 },   // Hora
@@ -55,39 +126,64 @@ export const generateDetailedReport = (data: ReportData) => {
     { wch: 10 },  // Pasajeros
     { wch: 12 },  // Equipaje de Mano
     { wch: 10 },  // Bodega
-    { wch: 12 },  // Estado
+    { wch: 12 },  // Vuelo
+    { wch: 12 },  // Tipo Vuelo
+    { wch: 15 },  // Estado
     { wch: 20 },  // Conductor Asignado
     { wch: 15 },  // Teléfono Conductor
-    { wch: 20 },  // Vehículo
-    { wch: 30 },  // Notas
-    { wch: 15 }   // Tipo Servicio
+    { wch: 25 },  // Email Conductor
+    { wch: 30 },  // Vehículo
+    { wch: 25 },  // Requerimientos Especiales
+    { wch: 25 }   // Servicios Adicionales
   ];
   reservationsSheet['!cols'] = reservationsColWidths;
   
   XLSX.utils.book_append_sheet(workbook, reservationsSheet, 'Reservas');
 
   // === HOJA 2: VIAJES ===
-  const tripsData = trips.map((trip, index) => ({
-    'N°': index + 1,
-    'ID Viaje': trip.id,
-    'Fecha': trip.trip_date ? new Date(trip.trip_date).toLocaleDateString('es-CL') : 'N/A',
-    'Hora': trip.trip_time || 'N/A',
-    'Cliente': trip.reservations?.profiles?.full_name || trip.reservations?.requester_name || 'N/A',
-    'Teléfono Cliente': trip.reservations?.contact_phone || 'N/A',
-    'Origen': trip.reservations?.pickup_location || 'Por definir',
-    'Destino': trip.reservations?.dropoff_location || 'Por definir',
-    'Conductor': trip.drivers?.full_name || 'No asignado',
-    'Teléfono Conductor': trip.drivers?.phone || 'N/A',
-    'Email Conductor': trip.drivers?.email || 'N/A',
-    'Licencia': trip.drivers?.license_number || 'N/A',
-    'Vehículo': trip.drivers?.vehicle_info || 'N/A',
-    'Pasajeros': trip.reservations?.passenger_count || 0,
-    'Estado Viaje': trip.status === 'pending' ? 'Pendiente' : 
-                    trip.status === 'confirmed' ? 'Confirmado' : 
-                    trip.status === 'in_progress' ? 'En Progreso' :
-                    trip.status === 'completed' ? 'Completado' : trip.status,
-    'Notas': trip.notes || trip.reservations?.notes || 'Sin notas'
-  }));
+  const tripsData = trips.map((trip, index) => {
+    // Buscar la reserva asociada a este viaje
+    const associatedReservation = reservations.find(reservation => reservation.trip_id === trip.id);
+    
+    // Buscar el conductor asociado al viaje
+    // Los trips vienen con el objeto driver incluido desde Supabase
+    const associatedDriver = trip.driver || null;
+
+    // Formatear información del vehículo
+    const vehicleInfo = associatedDriver?.vehicle_info 
+      ? (typeof associatedDriver.vehicle_info === 'object' 
+         ? `${associatedDriver.vehicle_info.brand} ${associatedDriver.vehicle_info.model} ${associatedDriver.vehicle_info.year} - ${associatedDriver.vehicle_info.plate}`
+         : associatedDriver.vehicle_info)
+      : 'N/A';
+
+    return {
+      'N°': index + 1,
+      'ID Viaje': trip.id,
+      'Código Reserva': associatedReservation?.confirmation_code || 'N/A',
+      'Fecha': trip.departure_time ? new Date(trip.departure_time).toLocaleDateString('es-CL') : 'N/A',
+      'Hora': trip.departure_time ? new Date(trip.departure_time).toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' }) : 'N/A',
+      'Cliente': associatedReservation?.profiles?.full_name || associatedReservation?.requester_name || 'N/A',
+      'Teléfono Cliente': associatedReservation?.contact_phone || 'N/A',
+      'Origen': trip.origin || associatedReservation?.pickup_location || 'Por definir',
+      'Destino': trip.destination || associatedReservation?.dropoff_location || 'Por definir',
+      'Conductor': associatedDriver?.full_name || 'No asignado',
+      'Teléfono Conductor': associatedDriver?.phone || 'N/A',
+      'Email Conductor': associatedDriver?.email || 'N/A',
+      'Licencia': associatedDriver?.license_number || 'N/A',
+      'Vehículo': vehicleInfo,
+      'Pasajeros': trip.max_passengers || associatedReservation?.passenger_count || 0,
+      'Duración Estimada': trip.estimated_duration ? `${trip.estimated_duration} min` : 'N/A',
+      'Estado Viaje': trip.status === 'available' ? 'Disponible' :
+                      trip.status === 'booked' ? 'Reservado' : 
+                      trip.status === 'assign_driver' ? 'Esperando Conductor' :
+                      trip.status === 'completed' ? 'Completado' : 
+                      trip.status === 'cancelled' ? 'Cancelado' : trip.status,
+      'Incluye Peajes': trip.includes_tolls ? 'Sí' : 'No',
+      'Incluye Parking': trip.includes_parking ? 'Sí' : 'No',
+      'GPS Tracking': trip.gps_tracking ? 'Sí' : 'No',
+      'Instrucciones': trip.special_instructions || associatedReservation?.special_requirements || 'Ninguna'
+    };
+  });
 
   const tripsSheet = XLSX.utils.json_to_sheet(tripsData);
   
@@ -95,6 +191,7 @@ export const generateDetailedReport = (data: ReportData) => {
   const tripsColWidths = [
     { wch: 5 },   // N°
     { wch: 12 },  // ID Viaje
+    { wch: 12 },  // Código Reserva
     { wch: 12 },  // Fecha
     { wch: 8 },   // Hora
     { wch: 20 },  // Cliente
@@ -105,10 +202,14 @@ export const generateDetailedReport = (data: ReportData) => {
     { wch: 15 },  // Teléfono Conductor
     { wch: 25 },  // Email Conductor
     { wch: 15 },  // Licencia
-    { wch: 20 },  // Vehículo
+    { wch: 30 },  // Vehículo
     { wch: 10 },  // Pasajeros
-    { wch: 12 },  // Estado Viaje
-    { wch: 30 }   // Notas
+    { wch: 12 },  // Duración Estimada
+    { wch: 15 },  // Estado Viaje
+    { wch: 12 },  // Incluye Peajes
+    { wch: 12 },  // Incluye Parking
+    { wch: 12 },  // GPS Tracking
+    { wch: 30 }   // Instrucciones
   ];
   tripsSheet['!cols'] = tripsColWidths;
   
@@ -178,9 +279,6 @@ export const generateQuickStats = (reservations: any[]) => {
     thisWeek: reservations.filter(r => new Date(r.created_at) >= startOfWeek).length,
     pending: reservations.filter(r => r.status === 'pending').length,
     confirmed: reservations.filter(r => r.status === 'confirmed').length,
-    completed: reservations.filter(r => r.status === 'completed').length,
-    totalRevenue: reservations.reduce((sum, r) => sum + (r.total_price || 0), 0),
-    averageRevenue: reservations.length > 0 ? 
-      reservations.reduce((sum, r) => sum + (r.total_price || 0), 0) / reservations.length : 0
+    completed: reservations.filter(r => r.status === 'completed').length
   };
 }; 

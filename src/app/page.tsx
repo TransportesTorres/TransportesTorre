@@ -102,28 +102,24 @@ export default function Home() {
     {
       title: "Traslado Aeropuerto",
       description: "Servicio personalizado desde/hacia el aeropuerto con recepción y seguimiento GPS",
-      price: "Desde $25.000",
       icon: <MapPinIcon className="h-8 w-8" />,
       features: ["Peajes incluidos", "Letrero corporativo", "Seguimiento GPS"]
     },
     {
       title: "Traslado Urbano",
-      description: "Movilización dentro de Santiago con tarifas por kilómetro",
-      price: "Desde $800/km",
+      description: "Movilización dentro de Santiago con tarifas competitivas",
       icon: <TruckIcon className="h-8 w-8" />,
       features: ["Sin recargos nocturnos", "Seguimiento GPS", "Tarifas competitivas"]
     },
     {
       title: "Servicio de Encomiendas",
       description: "Entrega segura de paquetes hasta 5 kg con confirmación",
-      price: "Desde $8.000",
       icon: <BuildingOfficeIcon className="h-8 w-8" />,
       features: ["Hasta 5 kg", "Confirmación de entrega", "Seguimiento GPS"]
     },
     {
       title: "Chofer 8 Horas",
       description: "Conductor profesional con disponibilidad completa por 8 horas",
-      price: "Desde $120.000",
       icon: <UserGroupIcon className="h-8 w-8" />,
       features: ["Disponibilidad completa", "Combustible incluido", "Conductor profesional"]
     }
@@ -291,12 +287,9 @@ export default function Home() {
                 <h3 className="text-xl font-semibold text-gray-900 mb-3">
                   {service.title}
                 </h3>
-                <p className="text-gray-600 mb-4">
+                <p className="text-gray-600 mb-6">
                   {service.description}
                 </p>
-                <div className="text-blue-600 font-bold text-lg mb-4">
-                  {service.price}
-                </div>
                 <ul className="space-y-2">
                   {service.features.map((feature, idx) => (
                     <li key={idx} className="flex items-center text-sm text-gray-600">
@@ -429,7 +422,8 @@ export default function Home() {
                 <PhoneIcon className="h-8 w-8 text-white" />
               </div>
               <h3 className="text-xl font-semibold mb-2">Teléfono</h3>
-              <p className="text-blue-100">+56 9 1234 5678</p>
+              <p className="text-blue-100">+56 9 73060444</p>
+              <p className="text-blue-100">+56 9 96476354</p>
               <p className="text-blue-100">24/7 Disponible</p>
             </div>
             <div className="text-center">
@@ -437,8 +431,8 @@ export default function Home() {
                 <EnvelopeIcon className="h-8 w-8 text-white" />
               </div>
               <h3 className="text-xl font-semibold mb-2">Email</h3>
-              <p className="text-blue-100">info@transportestorres.cl</p>
-              <p className="text-blue-100">reservas@transportestorres.cl</p>
+              <p className="text-blue-100">contacto@viajestorres.cl</p>
+              <p className="text-blue-100">jtorres@viajestorres.cl</p>
             </div>
             <div className="text-center">
               <div className="bg-blue-800 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -509,8 +503,9 @@ export default function Home() {
             <div>
               <h4 className="font-semibold mb-4">Contacto</h4>
               <ul className="space-y-2 text-sm text-gray-400">
-                <li>+56 9 1234 5678</li>
-                <li>info@transportestorres.cl</li>
+                <li>+56 9 73060444</li>
+                <li>+56 9 96476354</li>
+                <li>contacto@viajestorres.cl</li>
                 <li>Santiago, Chile</li>
                 <li>RUT: 77.772.239-5</li>
               </ul>

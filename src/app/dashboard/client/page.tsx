@@ -112,14 +112,6 @@ export default function ClientDashboard() {
     });
   };
 
-  // Formatear precio
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('es-CL', {
-      style: 'currency',
-      currency: 'CLP'
-    }).format(price);
-  };
-
   // Obtener color del estado
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -322,11 +314,6 @@ export default function ClientDashboard() {
                           <div className="flex items-center space-x-1">
                             <UserIcon className="h-4 w-4" />
                             <span>{request.passenger_count} pasajero{request.passenger_count > 1 ? 's' : ''}</span>
-                          </div>
-                          <div className="flex items-center space-x-1">
-                            <span className="font-medium text-green-600">
-                              {formatPrice(request.total_price)}
-                            </span>
                           </div>
                           <div className="flex items-center space-x-1">
                             <ClockIcon className="h-4 w-4" />

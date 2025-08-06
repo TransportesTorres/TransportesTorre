@@ -39,12 +39,6 @@ const ClockIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
-const CurrencyDollarIcon = ({ className }: { className?: string }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-  </svg>
-);
-
 const PhoneIcon = ({ className }: { className?: string }) => (
   <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
@@ -77,7 +71,6 @@ interface Reservation {
   user_id: string;
   passenger_count: number;
   passenger_names: string[];
-  total_price: number;
   status: 'pending' | 'confirmed' | 'in_progress' | 'completed' | 'cancelled';
   pickup_location: string;
   dropoff_location: string;
@@ -123,14 +116,6 @@ export default function ClientReservations() {
       hour: '2-digit',
       minute: '2-digit'
     });
-  };
-
-  // Formatear precio
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('es-CL', {
-      style: 'currency',
-      currency: 'CLP'
-    }).format(price);
   };
 
   // Obtener color del estado
@@ -354,9 +339,9 @@ export default function ClientReservations() {
                             </span>
                           </div>
                           <div className="flex items-center space-x-2">
-                            <CurrencyDollarIcon className="h-4 w-4 text-gray-500" />
+                            <PhoneIcon className="h-4 w-4 text-gray-500" />
                             <span className="text-sm text-gray-600">
-                              {formatPrice(reservation.total_price)}
+                              {reservation.contact_phone}
                             </span>
                           </div>
                           <div className="flex items-center space-x-2">
@@ -438,8 +423,8 @@ export default function ClientReservations() {
                       <p className="text-gray-900">{selectedReservation.passenger_count}</p>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-gray-700">Precio Total</p>
-                      <p className="text-gray-900 font-semibold">{formatPrice(selectedReservation.total_price)}</p>
+                      <p className="text-sm font-medium text-gray-700">Teléfono de Contacto</p>
+                      <p className="text-gray-900">{selectedReservation.contact_phone}</p>
                     </div>
                   </div>
                 </div>

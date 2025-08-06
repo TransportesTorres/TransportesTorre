@@ -32,7 +32,17 @@ export const fetchTrips = createAsyncThunk(
         .select(`
           *,
           driver:drivers(*),
-          service_type:service_types(*)
+          service_type:service_types(*),
+          reservations(
+            *,
+            profiles(
+              id,
+              email,
+              full_name,
+              phone,
+              role
+            )
+          )
         `)
         .order('departure_time', { ascending: true });
 
@@ -230,8 +240,12 @@ export const fetchTripsWithReservations = createAsyncThunk(
             user_id,
             status,
             passenger_count,
-            total_price,
-            created_at,
+            pickup_location,
+            dropoff_location,
+            contact_phone,
+            flight_number,
+            special_requirements,
+            confirmation_code,
             profiles!inner(
               id,
               full_name,
@@ -267,7 +281,6 @@ export const getTripReservationUser = createAsyncThunk(
           user_id,
           status,
           passenger_count,
-          total_price,
           pickup_location,
           dropoff_location,
           contact_phone,
@@ -392,7 +405,6 @@ export const cancelTrip = createAsyncThunk(
             pickup_location: reservationData.pickup_location,
             dropoff_location: reservationData.dropoff_location,
             passenger_count: reservationData.passenger_count,
-            total_price: reservationData.total_price,
             contact_phone: reservationData.contact_phone,
             flight_number: reservationData.flight_number,
             special_requirements: reservationData.special_requirements,
@@ -400,7 +412,9 @@ export const cancelTrip = createAsyncThunk(
             vehicle_info: tripUpdate.data.driver?.vehicle_info 
               ? `${tripUpdate.data.driver.vehicle_info.brand} ${tripUpdate.data.driver.vehicle_info.model}`
               : undefined,
-            reservation_status: 'Cancelado por administración'
+            reservation_status: 'Cancelado por administración',
+            pickup_time: reservationData.pickup_time,
+            service_date: reservationData.service_date
           };
 
           console.log('📧 Datos del correo:', emailData);
@@ -534,23 +548,27 @@ export const completeTrip = createAsyncThunk(
 
       console.log('✅ Estados actualizados correctamente');
 
-      // 3. Enviar correo de finalización al usuario
+      // 3. Enviar correo de finalización al usuario con link de rating
       console.log('📧 Preparando correo de finalización...');
       try {
+        const ratingUrl = `${window.location.origin}/rating/${reservation.id}`;
+        
         const reservationData = {
           client_name: user.full_name,
           confirmation_code: reservation.confirmation_code,
           pickup_location: reservation.pickup_location,
           dropoff_location: reservation.dropoff_location,
           passenger_count: reservation.passenger_count,
-          total_price: reservation.total_price,
           contact_phone: reservation.contact_phone,
           flight_number: reservation.flight_number,
           special_requirements: reservation.special_requirements,
           driver_name: tripUpdate.data.driver?.full_name,
           vehicle_info: tripUpdate.data.driver?.vehicle_info 
             ? `${tripUpdate.data.driver.vehicle_info.brand} ${tripUpdate.data.driver.vehicle_info.model}`
-            : undefined
+            : undefined,
+          pickup_time: reservation.pickup_time,
+          service_date: reservation.service_date,
+          rating_url: ratingUrl
         };
 
         console.log('📧 Datos del correo:', reservationData);

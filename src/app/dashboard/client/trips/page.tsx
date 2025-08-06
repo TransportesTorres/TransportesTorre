@@ -235,12 +235,6 @@ export default function ClientTripRequest() {
 
     setIsSubmitting(true);
     try {
-      // Usar precio base estándar para traslados
-      const basePrice = 25000; // Precio base estándar
-      
-      // Calcular precio total estimado
-      const estimatedPrice = basePrice * formData.passenger_count;
-
       // Obtener el primer tipo de servicio disponible o usar un ID por defecto
       const defaultServiceTypeId = serviceTypes.length > 0 ? serviceTypes[0].id : undefined;
 
@@ -252,7 +246,6 @@ export default function ClientTripRequest() {
         // Información básica de la reserva
         passenger_count: formData.passenger_count,
         passenger_names: formData.passenger_names.filter(name => name.trim() !== ''),
-        total_price: estimatedPrice,
         pickup_location: formData.pickup_location || 'Por definir',
         dropoff_location: formData.dropoff_location || 'Por definir',
         special_requirements: formData.special_requirements,
@@ -316,7 +309,7 @@ export default function ClientTripRequest() {
 
   return (
     <ProtectedRoute requiredRole="client">
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50 text-gray-900">
         {/* Header */}
         <header className="bg-white shadow-sm border-b">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
