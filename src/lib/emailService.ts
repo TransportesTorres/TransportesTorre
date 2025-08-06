@@ -92,7 +92,6 @@ class EmailService {
                         <p><strong>📍 Origen:</strong> {{pickup_location}}</p>
                         <p><strong>📍 Destino:</strong> {{dropoff_location}}</p>
                         <p><strong>👥 Pasajeros:</strong> {{passenger_count}}</p>
-                        <p><strong>💰 Precio Total:</strong> ${{total_price}}</p>
                         <p><strong>📞 Teléfono:</strong> {{contact_phone}}</p>
                         {{#if flight_number}}
                         <p><strong>✈️ Vuelo:</strong> {{flight_number}}</p>
@@ -170,7 +169,7 @@ class EmailService {
                         <p><strong>📍 Origen:</strong> {{pickup_location}}</p>
                         <p><strong>📍 Destino:</strong> {{dropoff_location}}</p>
                         <p><strong>👥 Pasajeros:</strong> {{passenger_count}}</p>
-                        <p><strong>💰 Precio:</strong> ${{total_price}}</p>
+                        <p><strong>📞 Teléfono:</strong> {{contact_phone}}</p>
                         {{#if driver_name}}
                         <p><strong>🚗 Conductor:</strong> {{driver_name}}</p>
                         {{/if}}
@@ -245,7 +244,6 @@ class EmailService {
                         <p><strong>📍 Origen:</strong> {{pickup_location}}</p>
                         <p><strong>📍 Destino:</strong> {{dropoff_location}}</p>
                         <p><strong>👥 Pasajeros:</strong> {{passenger_count}}</p>
-                        <p><strong>💰 Precio:</strong> ${{total_price}}</p>
                         <p><strong>📞 Teléfono:</strong> {{contact_phone}}</p>
                         {{#if flight_number}}
                         <p><strong>✈️ Vuelo:</strong> {{flight_number}}</p>
@@ -307,7 +305,6 @@ class EmailService {
                         <p><strong>📍 Origen:</strong> {{pickup_location}}</p>
                         <p><strong>📍 Destino:</strong> {{dropoff_location}}</p>
                         <p><strong>👥 Pasajeros:</strong> {{passenger_count}}</p>
-                        <p><strong>💰 Valor:</strong> ${{total_price}}</p>
                     </div>
                     
                     <div class="client-info">
@@ -384,7 +381,6 @@ class EmailService {
                         <p><strong>🚗 Conductor:</strong> {{driver_name}}</p>
                         {{/if}}
                         <p><strong>👥 Pasajeros:</strong> {{passenger_count}}</p>
-                        <p><strong>💰 Precio:</strong> ${{total_price}}</p>
                     </div>
                     
                     <div class="rating">

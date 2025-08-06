@@ -18,7 +18,6 @@ export interface SimpleReservationData {
   pickup_location: string;
   dropoff_location: string;
   passenger_count: number;
-  total_price: number;
   contact_phone: string;
   flight_number?: string;
   special_requirements?: string;

@@ -77,7 +77,6 @@ export default function CreateTripPage() {
     arrival_time: undefined as string | undefined,
     estimated_duration: 60,
     service_type_id: '',
-    price: 0,
     max_passengers: 1,
     driver_id: '',
     vehicle_category: 'sedan_ejecutivo' as const,
@@ -99,16 +98,6 @@ export default function CreateTripPage() {
     dispatch(fetchDrivers());
     dispatch(fetchVehicleCategories());
   }, [dispatch]);
-
-  // Actualizar precio base cuando cambie el tipo de servicio
-  useEffect(() => {
-    if (formData.service_type_id && serviceTypes.length > 0) {
-      const selectedServiceType = serviceTypes.find(st => st.id === formData.service_type_id);
-      if (selectedServiceType) {
-        setFormData(prev => ({ ...prev, price: selectedServiceType.base_price }));
-      }
-    }
-  }, [formData.service_type_id, serviceTypes]);
 
   // Actualizar pasajeros máximos cuando cambie la categoría del vehículo
   useEffect(() => {
@@ -150,7 +139,6 @@ export default function CreateTripPage() {
     if (!formData.departure_time) newErrors.departure_time = 'La fecha y hora de salida es requerida';
     if (formData.estimated_duration <= 0) newErrors.estimated_duration = 'La duración debe ser mayor a 0';
     if (!formData.service_type_id) newErrors.service_type_id = 'El tipo de servicio es requerido';
-    if (formData.price <= 0) newErrors.price = 'El precio debe ser mayor a 0';
     if (!formData.driver_id) newErrors.driver_id = 'El conductor es requerido';
     if (formData.max_passengers <= 0) newErrors.max_passengers = 'El número de pasajeros debe ser mayor a 0';
 
@@ -355,26 +343,6 @@ export default function CreateTripPage() {
                   </select>
                   {errors.service_type_id && (
                     <p className="text-red-600 text-sm mt-1">{errors.service_type_id}</p>
-                  )}
-                </div>
-
-                {/* Precio */}
-                <div>
-                  <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-2">
-                    <CurrencyDollarIcon className="h-4 w-4 inline mr-1" />
-                    Precio
-                  </label>
-                  <input
-                    type="number"
-                    id="price"
-                    name="price"
-                    value={formData.price}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
-                    placeholder="25000"
-                  />
-                  {errors.price && (
-                    <p className="text-red-600 text-sm mt-1">{errors.price}</p>
                   )}
                 </div>
 

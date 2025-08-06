@@ -59,18 +59,18 @@ export interface Trip {
   estimated_duration: number; // en minutos
   service_type_id: string;
   service_type?: ServiceType;
-  price: number;
   max_passengers: number;
   driver_id: string;
   driver?: Driver;
   vehicle_category: 'sedan_ejecutivo' | 'sedan_lujo' | 'minivan_ejecutiva' | 'minivan_lujo' | 'suv_ejecutiva' | 'sprinter';
-  status: 'available' | 'booked' | 'completed' | 'cancelled';
+  status: 'available' | 'booked' | 'assign_driver' | 'completed' | 'cancelled';
   special_instructions?: string;
   includes_tolls: boolean;
   includes_parking: boolean;
   gps_tracking: boolean;
   created_at: string;
   updated_at: string;
+  reservations?: Reservation; // Relación con la reserva
 }
 
 export interface Reservation {
@@ -81,8 +81,7 @@ export interface Reservation {
   user?: User;
   passenger_count: number;
   passenger_names: string[];
-  total_price: number;
-  status: 'pending' | 'confirmed' | 'completed' | 'cancelled';
+  status: 'pending' | 'confirmed' | 'assign_driver' | 'completed' | 'cancelled';
   pickup_location: string;
   dropoff_location: string;
   special_requirements?: string;
@@ -153,6 +152,10 @@ export interface Rating {
   comment?: string;
   would_recommend: boolean;
   created_at: string;
+  // Relaciones opcionales
+  reservation?: Reservation;
+  user?: User;
+  driver?: Driver;
 }
 
 export interface PerformanceReport {

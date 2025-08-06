@@ -11,7 +11,6 @@ interface SimpleReservationData {
   pickup_location: string;
   dropoff_location: string;
   passenger_count: number;
-  total_price: number;
   contact_phone: string;
   flight_number?: string;
   special_requirements?: string;
@@ -22,6 +21,9 @@ interface SimpleReservationData {
   trip_destination?: string;
   departure_time?: string;
   reservation_status?: string;
+  pickup_time?: string;
+  service_date?: string;
+  rating_url?: string;
 }
 
 // Crear transporter
@@ -74,7 +76,8 @@ function generateEmailTemplate(templateName: string, data: SimpleReservationData
                   
                   <div class="success">
                       <h3>✅ ¡Excelente noticia! Tu reserva ha sido confirmada</h3>
-                      <p>Todo está listo para tu viaje</p>
+                      <p>Estamos procesando tu solicitud</p>
+                      <p><strong>⏳ Espere por la asignación del chofer para completar totalmente su reserva</strong></p>
                   </div>
                   
                   <div class="info-box">
@@ -83,14 +86,16 @@ function generateEmailTemplate(templateName: string, data: SimpleReservationData
                       <p><strong>📍 Origen:</strong> ${data.pickup_location}</p>
                       <p><strong>📍 Destino:</strong> ${data.dropoff_location}</p>
                       <p><strong>👥 Pasajeros:</strong> ${data.passenger_count}</p>
+                      ${data.service_date ? `<p><strong>📅 Fecha:</strong> ${data.service_date}</p>` : ''}
+                      ${data.pickup_time ? `<p><strong>🕐 Hora de Recogida:</strong> ${data.pickup_time}</p>` : ''}
                       ${data.driver_name ? `<p><strong>🚗 Conductor:</strong> ${data.driver_name}</p>` : ''}
                       ${data.flight_number ? `<p><strong>✈️ Vuelo:</strong> ${data.flight_number}</p>` : ''}
                   </div>
                   
                   <div class="info-box">
                       <h3>📞 Contacto</h3>
-                      <p><strong>📱 WhatsApp:</strong> +56 9 1234 5678</p>
-                      <p><strong>📧 Email:</strong> reservas@transportestorres.cl</p>
+                      <p><strong>📱 WhatsApp:</strong> +56 9 73060444</p>
+                      <p><strong>📧 Email:</strong> reservas@viajestorres.cl</p>
                       <p><strong>🔑 Tu Código:</strong> ${data.confirmation_code}</p>
                   </div>
               </div>
@@ -140,6 +145,8 @@ function generateEmailTemplate(templateName: string, data: SimpleReservationData
                       <p><strong>📍 Origen:</strong> ${data.pickup_location}</p>
                       <p><strong>📍 Destino:</strong> ${data.dropoff_location}</p>
                       <p><strong>👥 Pasajeros:</strong> ${data.passenger_count}</p>
+                      ${data.service_date ? `<p><strong>📅 Fecha:</strong> ${data.service_date}</p>` : ''}
+                      ${data.pickup_time ? `<p><strong>🕐 Hora de Recogida:</strong> ${data.pickup_time}</p>` : ''}
                       ${data.special_requirements ? `<p><strong>📝 Requerimientos especiales:</strong> ${data.special_requirements}</p>` : ''}
                   </div>
                   
@@ -152,8 +159,8 @@ function generateEmailTemplate(templateName: string, data: SimpleReservationData
                   
                   <div class="info-box">
                       <h3>📞 Contacto de Emergencia</h3>
-                      <p><strong>📱 Central:</strong> +56 9 1234 5678</p>
-                      <p><strong>📧 Soporte:</strong> operaciones@transportestorres.cl</p>
+                      <p><strong>📱 Central:</strong> +56 9 73060444</p>
+                      <p><strong>📧 Soporte:</strong> reservas@viajestorres.cl</p>
                   </div>
               </div>
               
@@ -206,6 +213,8 @@ function generateEmailTemplate(templateName: string, data: SimpleReservationData
                       <h3>📋 Resumen del Viaje</h3>
                       <p><strong>🎫 Código:</strong> ${data.confirmation_code}</p>
                       <p><strong>📍 Ruta:</strong> ${data.pickup_location} → ${data.dropoff_location}</p>
+                      ${data.service_date ? `<p><strong>📅 Fecha:</strong> ${data.service_date}</p>` : ''}
+                      ${data.pickup_time ? `<p><strong>🕐 Hora de Recogida:</strong> ${data.pickup_time}</p>` : ''}
                       ${data.driver_name ? `<p><strong>🚗 Conductor:</strong> ${data.driver_name}</p>` : ''}
                       <p><strong>👥 Pasajeros:</strong> ${data.passenger_count}</p>
                       ${data.flight_number ? `<p><strong>✈️ Vuelo:</strong> ${data.flight_number}</p>` : ''}
@@ -215,15 +224,24 @@ function generateEmailTemplate(templateName: string, data: SimpleReservationData
                       <h3>⭐ ¿Qué te pareció el servicio?</h3>
                       <div class="stars">⭐⭐⭐⭐⭐</div>
                       <p>Tu opinión es muy importante para nosotros</p>
-                      <p><strong>📱 WhatsApp:</strong> +56 9 1234 5678</p>
-                      <p><strong>📧 Email:</strong> feedback@transportestorres.cl</p>
+                      ${data.rating_url ? `
+                        <div style="margin: 20px 0;">
+                          <a href="${data.rating_url}" style="background: #059669; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: bold; font-size: 16px;">
+                            📝 Calificar Mi Viaje
+                          </a>
+                        </div>
+                        <p style="font-size: 14px; color: #666;">Haz clic en el botón para dejar tu calificación</p>
+                      ` : `
+                        <p><strong>📱 WhatsApp:</strong> +56 9 73060444</p>
+                        <p><strong>📧 Email:</strong> reservas@viajestorres.cl</p>
+                      `}
                   </div>
                   
                   <div class="info-box">
                       <h3>🎉 ¡Gracias por elegir Transportes Torres!</h3>
                       <p>Para futuras reservas:</p>
-                      <p>📧 reservas@transportestorres.cl</p>
-                      <p>📱 +56 9 1234 5678</p>
+                      <p>📧 reservas@viajestorres.cl</p>
+                      <p>📱 +56 9 73060444</p>
                   </div>
               </div>
               
@@ -273,7 +291,8 @@ function generateEmailTemplate(templateName: string, data: SimpleReservationData
                       <p><strong>📍 Origen:</strong> ${data.pickup_location}</p>
                       <p><strong>📍 Destino:</strong> ${data.dropoff_location}</p>
                       <p><strong>👥 Pasajeros:</strong> ${data.passenger_count}</p>
-                      <p><strong>💰 Valor:</strong> $${data.total_price.toLocaleString('es-CL')}</p>
+                      ${data.service_date ? `<p><strong>📅 Fecha:</strong> ${data.service_date}</p>` : ''}
+                      ${data.pickup_time ? `<p><strong>🕐 Hora de Recogida:</strong> ${data.pickup_time}</p>` : ''}
                   </div>
                   
                   <div class="info-box">
@@ -284,6 +303,75 @@ function generateEmailTemplate(templateName: string, data: SimpleReservationData
               </div>
               
               <div class="footer">
+                  <p>© 2024 Transportes Torres SpA</p>
+              </div>
+          </div>
+      </body>
+      </html>
+      `
+    },
+
+    driver_assigned: {
+      subject: `🚗 Conductor Asignado - ${data.confirmation_code} | Transportes Torres`,
+      html: `
+      <!DOCTYPE html>
+      <html>
+      <head>
+          <meta charset="UTF-8">
+          <style>
+              body { font-family: Arial, sans-serif; color: #333; line-height: 1.6; margin: 0; padding: 0; }
+              .container { max-width: 600px; margin: 0 auto; background: #ffffff; }
+              .header { background: #059669; color: white; padding: 30px 20px; text-align: center; }
+              .content { padding: 30px 20px; }
+              .info-box { background: #f0fdf4; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #059669; }
+              .success { background: #d1fae5; color: #065f46; padding: 20px; border-radius: 8px; margin: 15px 0; text-align: center; }
+              .driver-box { background: #dbeafe; color: #1e40af; padding: 20px; border-radius: 8px; margin: 15px 0; }
+              .footer { background: #1f2937; color: #e5e7eb; padding: 20px; text-align: center; }
+          </style>
+      </head>
+      <body>
+          <div class="container">
+              <div class="header">
+                  <h1>🚗 Transportes Torres</h1>
+                  <h2>¡Conductor Asignado!</h2>
+              </div>
+              
+              <div class="content">
+                  <p>Estimado/a <strong>${data.client_name}</strong>,</p>
+                  
+                  <div class="success">
+                      <h3>✅ ¡Su reserva está completamente confirmada!</h3>
+                      <p>Hemos asignado un conductor para su viaje</p>
+                      <p>Código de confirmación: <strong>${data.confirmation_code}</strong></p>
+                  </div>
+                  
+                  <div class="driver-box">
+                      <h3>👨‍✈️ Su Conductor Asignado</h3>
+                      <p><strong>Nombre:</strong> ${data.driver_name}</p>
+                      <p><strong>📞 Teléfono:</strong> ${data.driver_phone}</p>
+                      ${data.vehicle_info ? `<p><strong>🚗 Vehículo:</strong> ${data.vehicle_info}</p>` : ''}
+                  </div>
+                  
+                  <div class="info-box">
+                      <h3>🎫 Detalles del Viaje</h3>
+                      <p><strong>Código:</strong> ${data.confirmation_code}</p>
+                      <p><strong>📍 Origen:</strong> ${data.pickup_location}</p>
+                      <p><strong>📍 Destino:</strong> ${data.dropoff_location}</p>
+                      <p><strong>👥 Pasajeros:</strong> ${data.passenger_count}</p>
+                      ${data.service_date ? `<p><strong>📅 Fecha:</strong> ${data.service_date}</p>` : ''}
+                      ${data.pickup_time ? `<p><strong>🕐 Hora de Recogida:</strong> ${data.pickup_time}</p>` : ''}
+                      ${data.flight_number ? `<p><strong>✈️ Vuelo:</strong> ${data.flight_number}</p>` : ''}
+                  </div>
+                  
+                  <div class="info-box">
+                      <h3>📞 Contacto de Emergencia</h3>
+                      <p><strong>📱 Central:</strong> +56 9 73060444</p>
+                      <p><strong>📧 Email:</strong> reservas@viajestorres.cl</p>
+                  </div>
+              </div>
+              
+              <div class="footer">
+                  <p>¡Buen viaje!</p>
                   <p>© 2024 Transportes Torres SpA</p>
               </div>
           </div>
@@ -329,6 +417,8 @@ function generateEmailTemplate(templateName: string, data: SimpleReservationData
                       <h3>📋 Resumen del Viaje</h3>
                       <p><strong>🎫 Código:</strong> ${data.confirmation_code}</p>
                       <p><strong>📍 Ruta:</strong> ${data.pickup_location} → ${data.dropoff_location}</p>
+                      ${data.service_date ? `<p><strong>📅 Fecha:</strong> ${data.service_date}</p>` : ''}
+                      ${data.pickup_time ? `<p><strong>🕐 Hora de Recogida:</strong> ${data.pickup_time}</p>` : ''}
                       ${data.driver_name ? `<p><strong>🚗 Conductor:</strong> ${data.driver_name}</p>` : ''}
                       <p><strong>👥 Pasajeros:</strong> ${data.passenger_count}</p>
                       ${data.flight_number ? `<p><strong>✈️ Vuelo:</strong> ${data.flight_number}</p>` : ''}
@@ -336,8 +426,8 @@ function generateEmailTemplate(templateName: string, data: SimpleReservationData
                   
                   <div class="info-box">
                       <h3>📞 Contacto de Emergencia</h3>
-                      <p><strong>📱 Central:</strong> +56 9 1234 5678</p>
-                      <p><strong>📧 Soporte:</strong> operaciones@transportestorres.cl</p>
+                      <p><strong>📱 Central:</strong> +56 9 73060444</p>
+                      <p><strong>📧 Soporte:</strong> reservas@viajestorres.cl</p>
                   </div>
               </div>
               
