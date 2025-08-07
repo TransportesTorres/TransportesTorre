@@ -180,10 +180,68 @@ const AdminDashboard = () => {
     (reservation.status === 'pending' || reservation.status === 'assign_driver')
   );
 
+  // Debug para entender los status de reservas y viajes
+  console.log('🔍 Debug - Reservations status:', reservations.map(r => ({
+    id: r.id.slice(0, 8),
+    status: r.status,
+    confirmation_code: r.confirmation_code
+  })));
+  
+  console.log('🔍 Debug - Trips status:', trips.map(t => ({
+    id: t.id.slice(0, 8),
+    status: t.status,
+    origin: t.origin,
+    destination: t.destination,
+    hasReservations: !!t.reservations,
+    reservationsLength: Array.isArray(t.reservations) ? t.reservations.length : 'not-array'
+  })));
+
   const confirmedReservations = reservations.filter(r => r.status === 'confirmed');
-  const activeTrips = trips.filter(t => t.status === 'booked' || t.status === 'confirmed');
+  const activeTrips = trips.filter(t => t.status === 'booked' || t.status === 'assign_driver');
   const completedTrips = trips.filter(t => t.status === 'completed');
   const availableDrivers = drivers.filter(d => d.is_active);
+
+  console.log('📊 Debug - Counts:', {
+    totalReservations: reservations.length,
+    confirmedReservations: confirmedReservations.length,
+    totalTrips: trips.length,
+    activeTrips: activeTrips.length,
+    completedTrips: completedTrips.length
+  });
+
+  // Debug específico para viajes activos
+  console.log('🚀 Debug - Active trips details:', activeTrips.map(t => ({
+    id: t.id.slice(0, 8),
+    status: t.status,
+    origin: t.origin,
+    destination: t.destination,
+    hasReservations: !!t.reservations,
+    reservationsArray: Array.isArray(t.reservations) ? t.reservations : 'not-array',
+    reservationsCount: Array.isArray(t.reservations) ? t.reservations.length : 'unknown'
+  })));
+
+  const filteredActiveTrips = activeTrips.filter(trip => {
+    if (!searchTerm) return true; // Si no hay término de búsqueda, mostrar todos
+    
+    const searchLower = searchTerm.toLowerCase();
+    const reservation = Array.isArray(trip.reservations) ? trip.reservations[0] : trip.reservations;
+    
+    return trip.origin?.toLowerCase().includes(searchLower) ||
+           trip.destination?.toLowerCase().includes(searchLower) ||
+           trip.driver?.full_name?.toLowerCase().includes(searchLower) ||
+           reservation?.confirmation_code?.toLowerCase().includes(searchLower) ||
+           reservation?.requester_name?.toLowerCase().includes(searchLower);
+  });
+
+  // Debug log para viajes activos filtrados
+  console.log('🔎 Debug - Filtered active trips:', filteredActiveTrips.map(t => ({
+    id: t.id.slice(0, 8),
+    status: t.status,
+    origin: t.origin,
+    destination: t.destination,
+    searchTerm: searchTerm,
+    reservationsLength: Array.isArray(t.reservations) ? t.reservations.length : 'not-array'
+  })));
 
   // Calcular estadísticas de hoy
   const today = new Date().toISOString().split('T')[0];
@@ -198,15 +256,12 @@ const AdminDashboard = () => {
   );
 
   const filteredConfirmedTrips = trips.filter(trip =>
-    trip.status === 'confirmed' && (
-      trip.reservations?.confirmation_code?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      trip.reservations?.requester_name?.toLowerCase().includes(searchTerm.toLowerCase())
+    (trip.status === 'booked' || trip.status === 'assign_driver') && (
+      !searchTerm || 
+      trip.origin?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      trip.destination?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      trip.driver?.full_name?.toLowerCase().includes(searchTerm.toLowerCase())
     )
-  );
-
-  const filteredActiveTrips = activeTrips.filter(trip =>
-    trip.reservations?.confirmation_code?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    trip.reservations?.requester_name?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const filteredCompletedTrips = completedTrips.filter(trip => {
@@ -272,10 +327,10 @@ const AdminDashboard = () => {
 
   // Función de prueba para completar un viaje
   const handleTestCompleteTrip = async () => {
-    const confirmedTrips = trips.filter(t => t.status === 'confirmed');
+    const confirmedTrips = trips.filter(t => t.status === 'booked' || t.status === 'assign_driver');
     if (confirmedTrips.length === 0) {
       setToast({
-        message: 'No hay viajes confirmados para completar',
+        message: 'No hay viajes activos para completar',
         type: 'error'
       });
       return;
@@ -1020,77 +1075,82 @@ const AdminDashboard = () => {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {filteredConfirmedTrips.map((trip) => (
-                      <tr key={trip.id} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm font-medium text-gray-900">
-                            {trip.reservations?.confirmation_code || 'N/A'}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div>
+                    {filteredConfirmedTrips.map((trip) => {
+                      // Obtener la primera reserva del array
+                      const reservation = Array.isArray(trip.reservations) ? trip.reservations[0] : trip.reservations;
+                      
+                      return (
+                        <tr key={trip.id} className="hover:bg-gray-50">
+                          <td className="px-6 py-4 whitespace-nowrap">
                             <div className="text-sm font-medium text-gray-900">
-                              {trip.reservations?.requester_name || 'N/A'}
+                              {reservation?.confirmation_code || 'N/A'}
                             </div>
-                            <div className="text-sm text-gray-500">
-                              {trip.reservations?.contact_phone || 'N/A'}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div>
+                              <div className="text-sm font-medium text-gray-900">
+                                {reservation?.requester_name || reservation?.profiles?.full_name || 'N/A'}
+                              </div>
+                              <div className="text-sm text-gray-500">
+                                {reservation?.contact_phone || reservation?.profiles?.phone || 'N/A'}
+                              </div>
                             </div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div>
-                            <div className="text-sm font-medium text-gray-900">
-                              {trip.driver?.full_name || 'No asignado'}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div>
+                              <div className="text-sm font-medium text-gray-900">
+                                {trip.driver?.full_name || 'No asignado'}
+                              </div>
+                              <div className="text-sm text-gray-500">
+                                {trip.driver?.phone || 'N/A'}
+                              </div>
                             </div>
-                            <div className="text-sm text-gray-500">
-                              {trip.driver?.phone || 'N/A'}
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="text-sm text-gray-900">
+                              <div>📍 {trip.origin || reservation?.pickup_location || 'N/A'}</div>
+                              <div>🎯 {trip.destination || reservation?.dropoff_location || 'N/A'}</div>
                             </div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="text-sm text-gray-900">
-                            <div>📍 {trip.origin || trip.reservations?.pickup_location || 'N/A'}</div>
-                            <div>🎯 {trip.destination || trip.reservations?.dropoff_location || 'N/A'}</div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">
-                            <div>{formatDate(trip.departure_time || trip.reservations?.service_date)}</div>
-                            <div>{formatTime(trip.departure_time || trip.reservations?.pickup_time)}</div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                          <div className="flex space-x-2">
-                            <button
-                              onClick={() => {
-                                setSelectedTrip(trip);
-                                setShowTripModal(true);
-                              }}
-                              className="text-blue-600 hover:text-blue-900"
-                              title="Ver detalles"
-                            >
-                              <EyeIcon className="h-4 w-4" />
-                            </button>
-                            <button
-                              onClick={() => handleCompleteTrip(trip)}
-                              disabled={isProcessing}
-                              className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-xs font-medium disabled:opacity-50"
-                              title="Completar viaje"
-                            >
-                              Completar
-                            </button>
-                            <button
-                              onClick={() => handleCancelTrip(trip)}
-                              disabled={isProcessing}
-                              className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-xs font-medium disabled:opacity-50"
-                              title="Cancelar viaje"
-                            >
-                              Cancelar
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900">
+                              <div>{formatDate(trip.departure_time || reservation?.service_date)}</div>
+                              <div>{formatTime(trip.departure_time || reservation?.pickup_time)}</div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <div className="flex space-x-2">
+                              <button
+                                onClick={() => {
+                                  setSelectedTrip(trip);
+                                  setShowTripModal(true);
+                                }}
+                                className="text-blue-600 hover:text-blue-900"
+                                title="Ver detalles"
+                              >
+                                <EyeIcon className="h-4 w-4" />
+                              </button>
+                              <button
+                                onClick={() => handleCompleteTrip(trip)}
+                                disabled={isProcessing}
+                                className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-xs font-medium disabled:opacity-50"
+                                title="Completar viaje"
+                              >
+                                Completar
+                              </button>
+                              <button
+                                onClick={() => handleCancelTrip(trip)}
+                                disabled={isProcessing}
+                                className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-xs font-medium disabled:opacity-50"
+                                title="Cancelar viaje"
+                              >
+                                Cancelar
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
@@ -1141,78 +1201,66 @@ const AdminDashboard = () => {
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredActiveTrips.map((trip) => (
-                  <div key={trip.id} className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
-                    <div className="flex justify-between items-start mb-4">
-                      <div>
-                        <h3 className="text-lg font-medium text-gray-900">
-                          {trip.reservations?.confirmation_code || trip.id.slice(0, 8)}
-                        </h3>
-                        <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
-                          {trip.status === 'booked' ? 'Reservado' : 'Confirmado'}
-                        </span>
-                      </div>
-                      <div className="flex space-x-1">
-                        <button
-                          onClick={() => {
-                            setSelectedTrip(trip);
-                            setShowTripModal(true);
-                          }}
-                          className="text-blue-600 hover:text-blue-900"
-                          title="Ver detalles"
-                        >
-                          <EyeIcon className="h-4 w-4" />
-                        </button>
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-3">
-                      <div>
-                        <p className="text-sm font-medium text-gray-700">Cliente:</p>
-                        <p className="text-sm text-gray-900">{trip.reservations?.requester_name || 'N/A'}</p>
+                {filteredActiveTrips.map((trip) => {
+                  // Obtener la primera reserva del array
+                  const reservation = Array.isArray(trip.reservations) ? trip.reservations[0] : trip.reservations;
+                  
+                  return (
+                    <div key={trip.id} className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
+                      <div className="flex justify-between items-start mb-4">
+                        <div>
+                          <h3 className="text-lg font-medium text-gray-900">
+                            {reservation?.confirmation_code || trip.id.slice(0, 8)}
+                          </h3>
+                          <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+                            {trip.status === 'booked' ? 'Reservado' : trip.status === 'assign_driver' ? 'Asignando Conductor' : 'Activo'}
+                          </span>
+                        </div>
+                        <div className="flex space-x-1">
+                          <button
+                            onClick={() => {
+                              setSelectedTrip(trip);
+                              setShowTripModal(true);
+                            }}
+                            className="text-blue-600 hover:text-blue-900"
+                            title="Ver detalles"
+                          >
+                            <EyeIcon className="h-4 w-4" />
+                          </button>
+                        </div>
                       </div>
                       
-                      <div>
-                        <p className="text-sm font-medium text-gray-700">Conductor:</p>
-                        <p className="text-sm text-gray-900">{trip.driver?.full_name || 'No asignado'}</p>
-                      </div>
-                      
-                      <div>
-                        <p className="text-sm font-medium text-gray-700">Ruta:</p>
-                        <p className="text-sm text-gray-900">
-                          📍 {trip.origin || trip.reservations?.pickup_location || 'N/A'}
-                        </p>
-                        <p className="text-sm text-gray-900">
-                          🎯 {trip.destination || trip.reservations?.dropoff_location || 'N/A'}
-                        </p>
-                      </div>
-                      
-                      <div>
-                        <p className="text-sm font-medium text-gray-700">Fecha/Hora:</p>
-                        <p className="text-sm text-gray-900">
-                          {formatDate(trip.departure_time || trip.reservations?.service_date)} - {formatTime(trip.departure_time || trip.reservations?.pickup_time)}
-                        </p>
+                      <div className="space-y-3">
+                        <div>
+                          <p className="text-sm font-medium text-gray-700">Cliente:</p>
+                          <p className="text-sm text-gray-900">{reservation?.requester_name || reservation?.profiles?.full_name || 'N/A'}</p>
+                        </div>
+                        
+                        <div>
+                          <p className="text-sm font-medium text-gray-700">Conductor:</p>
+                          <p className="text-sm text-gray-900">{trip.driver?.full_name || 'No asignado'}</p>
+                        </div>
+                        
+                        <div>
+                          <p className="text-sm font-medium text-gray-700">Ruta:</p>
+                          <p className="text-sm text-gray-900">
+                            📍 {trip.origin || reservation?.pickup_location || 'N/A'}
+                          </p>
+                          <p className="text-sm text-gray-900">
+                            🎯 {trip.destination || reservation?.dropoff_location || 'N/A'}
+                          </p>
+                        </div>
+                        
+                        <div>
+                          <p className="text-sm font-medium text-gray-700">Fecha/Hora:</p>
+                          <p className="text-sm text-gray-900">
+                            {formatDate(trip.departure_time || reservation?.service_date)} - {formatTime(trip.departure_time || reservation?.pickup_time)}
+                          </p>
+                        </div>
                       </div>
                     </div>
-                    
-                    <div className="mt-4 pt-4 border-t border-gray-200 flex space-x-2">
-                      <button
-                        onClick={() => handleCompleteTrip(trip)}
-                        disabled={isProcessing}
-                        className="flex-1 bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded text-sm font-medium disabled:opacity-50"
-                      >
-                        Completar
-                      </button>
-                      <button
-                        onClick={() => handleCancelTrip(trip)}
-                        disabled={isProcessing}
-                        className="flex-1 bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded text-sm font-medium disabled:opacity-50"
-                      >
-                        Cancelar
-                      </button>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
@@ -1266,7 +1314,7 @@ const AdminDashboard = () => {
                 </p>
                 
                 {/* Botón de prueba para completar un viaje */}
-                {completedTrips.length === 0 && trips.filter(t => t.status === 'confirmed').length > 0 && (
+                {completedTrips.length === 0 && trips.filter(t => t.status === 'booked' || t.status === 'assign_driver').length > 0 && (
                   <div className="mt-6">
                     <button
                       onClick={handleTestCompleteTrip}
