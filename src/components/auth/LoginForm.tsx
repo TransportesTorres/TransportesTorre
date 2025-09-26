@@ -9,6 +9,7 @@ import { LoginCredentials } from '@/types';
 
 interface LoginFormProps {
   onToggleForm?: () => void;
+  onForgotPassword?: () => void;
 }
 
 // Iconos SVG personalizados
@@ -37,7 +38,7 @@ const LockIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
-export default function LoginForm({ onToggleForm }: LoginFormProps) {
+export default function LoginForm({ onToggleForm, onForgotPassword }: LoginFormProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [focusedField, setFocusedField] = useState<string | null>(null);
   const dispatch = useAppDispatch();
@@ -203,9 +204,13 @@ export default function LoginForm({ onToggleForm }: LoginFormProps) {
             </label>
           </div>
           <div className="text-sm">
-            <a href="#" className="font-medium text-blue-600 hover:text-blue-500 transition-colors duration-200">
+            <button
+              type="button"
+              onClick={onForgotPassword}
+              className="font-medium text-blue-600 hover:text-blue-500 transition-colors duration-200 underline"
+            >
               ¿Olvidaste tu contraseña?
-            </a>
+            </button>
           </div>
         </div>
 
