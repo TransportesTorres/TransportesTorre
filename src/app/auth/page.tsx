@@ -26,6 +26,7 @@ function AuthPageContent() {
   const router = useRouter();
   const mode = searchParams.get('mode') || 'login';
   const fromRegistration = searchParams.get('from') === 'registration';
+  const fromConfirmation = searchParams.get('from') === 'confirmation';
 
   useEffect(() => {
     if (user) {
@@ -91,15 +92,39 @@ function AuthPageContent() {
             </div>
           )}
 
+          {/* Mensaje después de confirmación exitosa */}
+          {fromConfirmation && mode === 'login' && (
+            <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl">
+              <div className="flex items-center">
+                <svg className="h-5 w-5 text-green-600 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <div>
+                  <p className="text-sm font-medium text-green-800">¡Cuenta confirmada exitosamente!</p>
+                  <p className="text-sm text-green-700">Tu email ha sido verificado. Ya puedes iniciar sesión.</p>
+                </div>
+              </div>
+            </div>
+          )}
+
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold text-gray-900 mb-2">
-              {mode === 'register' ? 'Crear Cuenta' : 'Iniciar Sesión'}
+              {mode === 'register' 
+                ? 'Crear Cuenta' 
+                : mode === 'forgot-password'
+                ? 'Recuperar Contraseña'
+                : 'Iniciar Sesión'
+              }
             </h2>
             <p className="text-gray-600">
               {mode === 'register' 
                 ? 'Regístrate para reservar tus viajes' 
+                : mode === 'forgot-password'
+                ? 'Te ayudamos a recuperar el acceso a tu cuenta'
                 : fromRegistration
                 ? 'Usa las credenciales que acabas de crear'
+                : fromConfirmation
+                ? 'Tu cuenta está lista, ingresa tus credenciales'
                 : 'Accede a tu cuenta para gestionar tus reservas'
               }
             </p>

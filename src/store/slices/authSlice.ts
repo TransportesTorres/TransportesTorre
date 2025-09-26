@@ -217,6 +217,46 @@ export const resendConfirmation = createAsyncThunk(
   }
 );
 
+// Función para solicitar restablecimiento de contraseña
+export const resetPassword = createAsyncThunk(
+  'auth/resetPassword',
+  async (email: string, { rejectWithValue }) => {
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth/reset-password`,
+      });
+
+      if (error) {
+        return rejectWithValue(error.message);
+      }
+
+      return { message: 'Se ha enviado un enlace de restablecimiento a tu correo electrónico' };
+    } catch (error) {
+      return rejectWithValue('Error al enviar correo de restablecimiento');
+    }
+  }
+);
+
+// Función para actualizar la contraseña
+export const updatePassword = createAsyncThunk(
+  'auth/updatePassword',
+  async (password: string, { rejectWithValue }) => {
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: password
+      });
+
+      if (error) {
+        return rejectWithValue(error.message);
+      }
+
+      return { message: 'Contraseña actualizada exitosamente' };
+    } catch (error) {
+      return rejectWithValue('Error al actualizar la contraseña');
+    }
+  }
+);
+
 const authSlice = createSlice({
   name: 'auth',
   initialState,
@@ -311,6 +351,32 @@ const authSlice = createSlice({
         state.error = null;
       })
       .addCase(changePassword.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
+      })
+      // Reset password
+      .addCase(resetPassword.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(resetPassword.fulfilled, (state) => {
+        state.isLoading = false;
+        state.error = null;
+      })
+      .addCase(resetPassword.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
+      })
+      // Update password
+      .addCase(updatePassword.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(updatePassword.fulfilled, (state) => {
+        state.isLoading = false;
+        state.error = null;
+      })
+      .addCase(updatePassword.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload as string;
       });
