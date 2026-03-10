@@ -1,6 +1,14 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { supabase } from '@/supabase/supabase';
 import { Reservation } from '@/types';
+import { 
+  sendReservationCreatedNotification,
+  sendNewReservationAdminNotification,
+  sendReservationConfirmedNotification,
+  sendDriverAssignedNotification,
+  sendTripAssignedDriverNotification,
+  sendTripCompletedNotification
+} from '@/lib/notificationHelpers';
 
 interface ReservationsState {
   reservations: Reservation[];
@@ -111,51 +119,83 @@ export const createReservation = createAsyncThunk(
         user: reservation.profiles
       };
 
-      // Enviar correo de notificación al admin
+      // Enviar notificaciones (Email + WhatsApp) al cliente y admin
       try {
-        console.log('📧 Enviando notificación al admin sobre nueva reserva...');
+        console.log('� Enviando notificaciones de nueva reserva...');
         
-        const adminNotificationData = {
-          client_name: reservation.profiles?.full_name || 'Cliente',
-          client_email: reservation.profiles?.email || 'Sin email',
+        const notificationData = {
+          client_name: reservation.profiles?.full_name || reservation.requester_name || 'Cliente',
           confirmation_code: reservation.confirmation_code,
           pickup_location: reservation.pickup_location,
           dropoff_location: reservation.dropoff_location,
           passenger_count: reservation.passenger_count,
-          contact_phone: reservation.contact_phone,
+          contact_phone: reservation.contact_phone || reservation.profiles?.phone || '',
           flight_number: reservation.flight_number,
           special_requirements: reservation.special_requirements,
-          trip_origin: reservation.trips?.origin,
-          trip_destination: reservation.trips?.destination,
-          departure_time: reservation.trips?.departure_time,
-          driver_name: reservation.trips?.driver?.full_name,
-          vehicle_info: reservation.trips?.driver?.vehicle_info 
-            ? `${reservation.trips.driver.vehicle_info.brand} ${reservation.trips.driver.vehicle_info.model}`
-            : undefined,
-          reservation_status: 'pending',
           pickup_time: reservation.pickup_time,
           service_date: reservation.service_date
         };
 
-        // Enviar correo al admin (puedes configurar el email del admin aquí)
-        const adminEmail = 'torres.transportes.spa@gmail.com'; // Email para pruebas
+        // 1. Notificar al cliente (Email + WhatsApp)
+        const clientEmail = reservation.profiles?.email || reservation.requester_email;
+        const clientPhone = reservation.contact_phone || reservation.profiles?.phone;
         
-        await fetch('/api/email/send-simple', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            templateName: 'new_reservation_admin',
-            recipientEmail: adminEmail,
-            reservationData: adminNotificationData
-          }),
+        console.log('📞 Debug - Client contact info:', {
+          email: clientEmail,
+          phone: clientPhone,
+          contact_phone: reservation.contact_phone,
+          profile_phone: reservation.profiles?.phone
         });
+        
+        if (clientEmail) {
+          const clientResult = await sendReservationCreatedNotification(
+            clientEmail,
+            clientPhone,
+            notificationData
+          );
+          
+          console.log('📱 Debug - Notification result:', clientResult);
+          
+          if (clientResult.success) {
+            console.log('✅ Notificaciones enviadas al cliente');
+            if (clientResult.results?.email.success) console.log('  ✓ Email enviado');
+            if (clientResult.results?.whatsapp.success) console.log('  ✓ WhatsApp enviado');
+            if (clientResult.results?.whatsapp.skipped) console.log('  ⚠️ WhatsApp omitido:', clientResult.results.whatsapp.reason);
+          } else {
+            console.error('❌ Error en notificaciones al cliente:', clientResult.error);
+          }
+        }
 
-        console.log('✅ Notificación enviada al admin:', adminEmail);
-      } catch (emailError) {
-        console.error('❌ Error enviando notificación al admin:', emailError);
-        // No fallar la creación de la reserva por un error de correo
+        // 2. Notificar al admin (Email + WhatsApp)
+        const adminEmails = (process.env.NEXT_PUBLIC_ADMIN_EMAILS || 'torres.transportes.spa@gmail.com')
+          .split(',')
+          .map((value) => value.trim())
+          .filter(Boolean);
+        const adminPhones = (process.env.NEXT_PUBLIC_ADMIN_PHONES || '')
+          .split(',')
+          .map((value) => value.trim())
+          .filter(Boolean);
+
+        const adminResults = await Promise.all(
+          adminEmails.map((adminEmail, index) =>
+            sendNewReservationAdminNotification(
+              adminEmail,
+              adminPhones[index],
+              notificationData
+            )
+          )
+        );
+
+        const allAdminsOk = adminResults.every((result) => result.success);
+        if (allAdminsOk) {
+          console.log('✅ Notificaciones enviadas al admin');
+        } else {
+          console.error('❌ Error en notificaciones al admin:', adminResults);
+        }
+
+      } catch (notificationError) {
+        console.error('❌ Error enviando notificaciones:', notificationError);
+        // No fallar la creación de la reserva por un error de notificación
       }
 
       return mappedData as Reservation;
@@ -217,13 +257,12 @@ export const confirmReservation = createAsyncThunk(
         throw new Error('Error al actualizar la reserva: ' + updateError.message);
       }
 
-      // Enviar email de confirmación SOLO al cliente
+      // Enviar notificaciones de confirmación (Email + WhatsApp) al cliente
       try {
-        console.log('📧 Enviando email de confirmación al cliente...');
+        console.log('� Enviando notificaciones de confirmación al cliente...');
 
-        const clientEmailData = {
+        const notificationData = {
           client_name: reservation.profiles?.full_name || reservation.requester_name || 'Cliente',
-          client_email: reservation.profiles?.email || reservation.requester_email,
           confirmation_code: reservation.confirmation_code,
           pickup_location: reservation.pickup_location,
           dropoff_location: reservation.dropoff_location,
@@ -231,29 +270,31 @@ export const confirmReservation = createAsyncThunk(
           contact_phone: reservation.contact_phone || reservation.profiles?.phone || 'No especificado',
           flight_number: reservation.flight_number,
           special_requirements: reservation.special_requirements,
-          reservation_status: 'confirmed',
           pickup_time: reservation.pickup_time,
           service_date: reservation.service_date
         };
 
-        if (reservation.profiles?.email || reservation.requester_email) {
-          const clientEmail = reservation.profiles?.email || reservation.requester_email;
-          await fetch('/api/email/send-simple', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              templateName: 'reservation_confirmed',
-              recipientEmail: clientEmail,
-              reservationData: clientEmailData
-            }),
-          });
-          console.log('✅ Email de confirmación enviado al cliente:', clientEmail);
+        const clientEmail = reservation.profiles?.email || reservation.requester_email;
+        const clientPhone = reservation.contact_phone || reservation.profiles?.phone;
+
+        if (clientEmail) {
+          const result = await sendReservationConfirmedNotification(
+            clientEmail,
+            clientPhone,
+            notificationData
+          );
+          
+          if (result.success) {
+            console.log('✅ Notificaciones de confirmación enviadas al cliente');
+            if (result.results?.email.success) console.log('  ✓ Email enviado');
+            if (result.results?.whatsapp.success) console.log('  ✓ WhatsApp enviado');
+          } else {
+            console.error('❌ Error en notificaciones de confirmación:', result.error);
+          }
         }
 
-      } catch (emailError) {
-        console.error('❌ Error enviando email de confirmación:', emailError);
+      } catch (notificationError) {
+        console.error('❌ Error enviando notificaciones de confirmación:', notificationError);
       }
 
       return updated;
@@ -353,11 +394,11 @@ export const assignDriverToReservation = createAsyncThunk(
         throw new Error('Error al actualizar la reserva: ' + updateError.message);
       }
 
-      // Enviar emails al cliente Y al conductor
+      // Enviar notificaciones (Email + WhatsApp) al cliente Y al conductor
       try {
-        console.log('📧 Enviando emails de asignación...');
+        console.log('� Enviando notificaciones de asignación...');
 
-        const emailData = {
+        const notificationData = {
           client_name: reservation.profiles?.full_name || reservation.requester_name || 'Cliente',
           confirmation_code: reservation.confirmation_code,
           pickup_location: reservation.pickup_location,
@@ -371,63 +412,49 @@ export const assignDriverToReservation = createAsyncThunk(
           vehicle_info: driver.vehicle_info ? 
             `${driver.vehicle_info.brand} ${driver.vehicle_info.model} ${driver.vehicle_info.year} - ${driver.vehicle_info.plate}` 
             : 'Información no disponible',
-          reservation_status: 'confirmed',
           pickup_time: reservation.pickup_time,
           service_date: reservation.service_date
         };
 
-        const emailPromises = [];
-
-        // Email al cliente (conductor asignado)
-        if (reservation.profiles?.email || reservation.requester_email) {
-          const clientEmail = reservation.profiles?.email || reservation.requester_email;
-          emailPromises.push(
-            fetch('/api/email/send-simple', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                templateName: 'driver_assigned',
-                recipientEmail: clientEmail,
-                reservationData: emailData
-              }),
-            })
-          );
-        }
-
-        // Email al conductor (viaje asignado)
-        if (driver.email) {
-          emailPromises.push(
-            fetch('/api/email/send-simple', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                templateName: 'trip_assigned_driver',
-                recipientEmail: driver.email,
-                reservationData: emailData
-              }),
-            })
-          );
-        }
-
-        // Enviar todos los emails en paralelo
-        const emailResponses = await Promise.all(emailPromises);
-        const emailResults = await Promise.all(emailResponses.map(response => response.json()));
-
-        console.log('📧 Resultados de emails:', emailResults);
+        // 1. Notificar al cliente (conductor asignado)
+        const clientEmail = reservation.profiles?.email || reservation.requester_email;
+        const clientPhone = reservation.contact_phone || reservation.profiles?.phone;
         
-        if (emailResults[0]?.success) {
-          console.log('✅ Email enviado al cliente');
-        }
-        if (emailResults[1]?.success) {
-          console.log('✅ Email enviado al conductor');
+        if (clientEmail) {
+          const clientResult = await sendDriverAssignedNotification(
+            clientEmail,
+            clientPhone,
+            notificationData
+          );
+          
+          if (clientResult.success) {
+            console.log('✅ Notificaciones enviadas al cliente');
+            if (clientResult.results?.email.success) console.log('  ✓ Email enviado');
+            if (clientResult.results?.whatsapp.success) console.log('  ✓ WhatsApp enviado');
+          } else {
+            console.error('❌ Error en notificaciones al cliente:', clientResult.error);
+          }
         }
 
-      } catch (emailError) {
-        console.error('❌ Error enviando emails:', emailError);
+        // 2. Notificar al conductor (viaje asignado)
+        if (driver.email) {
+          const driverResult = await sendTripAssignedDriverNotification(
+            driver.email,
+            driver.phone,
+            notificationData
+          );
+          
+          if (driverResult.success) {
+            console.log('✅ Notificaciones enviadas al conductor');
+            if (driverResult.results?.email.success) console.log('  ✓ Email enviado');
+            if (driverResult.results?.whatsapp.success) console.log('  ✓ WhatsApp enviado');
+          } else {
+            console.error('❌ Error en notificaciones al conductor:', driverResult.error);
+          }
+        }
+
+      } catch (notificationError) {
+        console.error('❌ Error enviando notificaciones:', notificationError);
       }
 
       return updated;

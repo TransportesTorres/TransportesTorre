@@ -25,6 +25,7 @@
     "react-hot-toast": "^2.5.2",
     "react-redux": "^9.2.0",
     "supabase": "^2.30.4",
+    "twilio": "^5.10.4",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
