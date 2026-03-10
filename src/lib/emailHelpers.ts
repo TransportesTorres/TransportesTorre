@@ -1,4 +1,5 @@
 // Funciones helper para integrar el sistema de correos con Redux
+import { getAuthHeaders } from './authHeaders';
 
 export interface EmailRequest {
   reservationId: string;
@@ -32,10 +33,12 @@ export async function sendSimpleReservationEmail(
   reservationData: SimpleReservationData
 ): Promise<EmailResponse> {
   try {
+    const authHeaders = await getAuthHeaders();
     const response = await fetch('/api/email/send-simple', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        ...authHeaders
       },
       body: JSON.stringify({
         templateName,
@@ -73,10 +76,12 @@ export async function sendReservationEmail(
   recipientEmail: string
 ): Promise<EmailResponse> {
   try {
+    const authHeaders = await getAuthHeaders();
     const response = await fetch('/api/email/send', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        ...authHeaders
       },
       body: JSON.stringify({
         reservationId,
@@ -296,8 +301,10 @@ export async function verifyEmailConfiguration(): Promise<{
   message: string;
 }> {
   try {
+    const authHeaders = await getAuthHeaders();
     const response = await fetch('/api/email/send', {
       method: 'GET',
+      headers: authHeaders,
     });
 
     const data = await response.json();

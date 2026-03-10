@@ -156,14 +156,17 @@ export const createReservation = createAsyncThunk(
         }
 
         // 2. Notificar al admin (Email + WhatsApp)
+        const { data: adminSession } = await supabase.auth.getSession();
+        const adminToken = adminSession.session?.access_token;
         const adminResponse = await fetch('/api/notifications/send-admin', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            ...(adminToken ? { Authorization: `Bearer ${adminToken}` } : {})
           },
           body: JSON.stringify({
             templateName: 'new_reservation_admin',
-            notificationData
+            reservationId: reservation.id
           })
         });
 
@@ -637,10 +640,13 @@ export const updateReservationStatus = createAsyncThunk(
           // Email al cliente
           if (reservation.profiles?.email || reservation.requester_email) {
             const clientEmail = reservation.profiles?.email || reservation.requester_email;
+            const { data: session } = await supabase.auth.getSession();
+            const token = session.session?.access_token;
             await fetch('/api/email/send-simple', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
+                ...(token ? { Authorization: `Bearer ${token}` } : {})
               },
               body: JSON.stringify({
                 templateName: 'reservation_confirmed',
@@ -653,10 +659,13 @@ export const updateReservationStatus = createAsyncThunk(
 
           // Email al conductor
           if (assignedDriver.email) {
+            const { data: session } = await supabase.auth.getSession();
+            const token = session.session?.access_token;
             await fetch('/api/email/send-simple', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
+                ...(token ? { Authorization: `Bearer ${token}` } : {})
               },
               body: JSON.stringify({
                 templateName: 'trip_assigned_driver',
@@ -722,10 +731,13 @@ export const updateReservationStatus = createAsyncThunk(
 
             if (reservation.profiles?.email || reservation.requester_email) {
               const clientEmail = reservation.profiles?.email || reservation.requester_email;
+              const { data: session } = await supabase.auth.getSession();
+              const token = session.session?.access_token;
               await fetch('/api/email/send-simple', {
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json',
+                  ...(token ? { Authorization: `Bearer ${token}` } : {})
                 },
                 body: JSON.stringify({
                   templateName: 'trip_cancelled',
