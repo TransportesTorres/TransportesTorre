@@ -95,24 +95,7 @@ export default function TripsManagement() {
   const [showDeleteModal, setShowDeleteModal] = useState<string | null>(null);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
 
-  // Debug: Mostrar estados en consola
-  useEffect(() => {
-    console.log('🔧 Estado editingTrip:', editingTrip);
-  }, [editingTrip]);
-
-  useEffect(() => {
-    console.log('🗑️ Estado showDeleteModal:', showDeleteModal);
-  }, [showDeleteModal]);
-
-  useEffect(() => {
-    console.log('📊 Viajes cargados:', trips.length, trips);
-  }, [trips]);
-
-  useEffect(() => {
-    if (toast) {
-      console.log('🔔 Toast mostrado:', toast);
-    }
-  }, [toast]);
+  // Debug eliminado para producción
   
   // Estados para el formulario de edición
   const [editFormData, setEditFormData] = useState({
@@ -153,7 +136,7 @@ export default function TripsManagement() {
 
   // Debug: Mostrar viajes filtrados
   useEffect(() => {
-    console.log('🔍 Viajes filtrados:', filteredTrips.length, filteredTrips);
+    
   }, [filteredTrips]);
 
   // Obtener nombre del conductor
@@ -278,10 +261,10 @@ export default function TripsManagement() {
 
   // Eliminar viaje
   const handleDeleteTrip = async (tripId: string) => {
-    console.log('🔥 Iniciando eliminación de viaje:', tripId);
+    
     try {
       await dispatch(deleteTrip(tripId)).unwrap();
-      console.log('✅ Viaje eliminado exitosamente');
+      
       setToast({
         message: 'Viaje eliminado exitosamente',
         type: 'success'
@@ -298,7 +281,7 @@ export default function TripsManagement() {
 
   // Inicializar formulario de edición cuando se selecciona un viaje
   useEffect(() => {
-    console.log('🔧 Inicializando formulario para:', editingTrip?.id);
+    
     if (editingTrip) {
       setEditFormData({
         origin: editingTrip.origin,
@@ -322,7 +305,7 @@ export default function TripsManagement() {
   // Manejar cambios en el formulario de edición
   const handleEditFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
-    console.log('📝 Cambio en formulario:', name, '=', value);
+    
     
     if (type === 'checkbox') {
       const checked = (e.target as HTMLInputElement).checked;
@@ -346,7 +329,7 @@ export default function TripsManagement() {
   // Manejar envío del formulario de edición
   const handleEditSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('📝 Enviando formulario de edición para:', editingTrip?.id);
+    
     if (!editingTrip) return;
 
     setIsUpdating(true);
@@ -362,14 +345,14 @@ export default function TripsManagement() {
         vehicle_category: editFormData.vehicle_category as any
       };
 
-      console.log('📦 Datos a enviar:', cleanedData);
+      
 
       await dispatch(updateTrip({ 
         id: editingTrip.id, 
         updates: cleanedData 
       })).unwrap();
 
-      console.log('✅ Viaje actualizado exitosamente');
+      
       setToast({
         message: 'Viaje actualizado exitosamente',
         type: 'success'
@@ -577,7 +560,7 @@ export default function TripsManagement() {
                           <div className="flex items-center space-x-2">
                             <button
                               onClick={() => {
-                                console.log('🔧 Editando viaje:', trip.id, trip);
+                                
                                 setEditingTrip(trip);
                               }}
                               className="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-blue-50"
@@ -587,7 +570,7 @@ export default function TripsManagement() {
                             </button>
                             <button
                               onClick={() => {
-                                console.log('🗑️ Eliminando viaje:', trip.id);
+                                
                                 setShowDeleteModal(trip.id);
                               }}
                               className="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50"
@@ -609,7 +592,7 @@ export default function TripsManagement() {
         {/* Modal de confirmación de eliminación */}
         {showDeleteModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 text-gray-900">
               <h3 className="text-lg font-medium text-gray-900 mb-4">Confirmar Eliminación</h3>
               <p className="text-gray-500 mb-6">
                 ¿Estás seguro de que quieres eliminar este viaje? Esta acción no se puede deshacer.
@@ -617,7 +600,7 @@ export default function TripsManagement() {
               <div className="flex justify-end space-x-4">
                 <button
                   onClick={() => {
-                    console.log('❌ Cancelando eliminación');
+                    
                     setShowDeleteModal(null);
                   }}
                   className="px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors"
@@ -626,7 +609,7 @@ export default function TripsManagement() {
                 </button>
                 <button
                   onClick={() => {
-                    console.log('🔥 Confirmando eliminación para:', showDeleteModal);
+                    
                     handleDeleteTrip(showDeleteModal);
                   }}
                   className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
@@ -641,7 +624,7 @@ export default function TripsManagement() {
         {/* Modal de edición de viaje */}
         {editingTrip && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto text-gray-900">
               <div className="p-6 border-b border-gray-200">
                 <div className="flex items-center justify-between">
                   <h3 className="text-lg font-medium text-gray-900">
@@ -649,7 +632,7 @@ export default function TripsManagement() {
                   </h3>
                   <button
                     onClick={() => {
-                      console.log('❌ Cerrando modal de edición');
+                      
                       setEditingTrip(null);
                     }}
                     className="text-gray-400 hover:text-gray-600"
@@ -672,7 +655,7 @@ export default function TripsManagement() {
                         name="origin"
                         value={editFormData.origin}
                         onChange={handleEditFormChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
                         placeholder="Lugar de origen"
                         required
                       />
@@ -687,7 +670,7 @@ export default function TripsManagement() {
                         name="destination"
                         value={editFormData.destination}
                         onChange={handleEditFormChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
                         placeholder="Lugar de destino"
                         required
                       />
@@ -705,7 +688,7 @@ export default function TripsManagement() {
                         name="departure_time"
                         value={editFormData.departure_time}
                         onChange={handleEditFormChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
                         required
                       />
                     </div>
@@ -719,7 +702,7 @@ export default function TripsManagement() {
                         name="arrival_time"
                         value={editFormData.arrival_time}
                         onChange={handleEditFormChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
                       />
                     </div>
 
@@ -732,7 +715,7 @@ export default function TripsManagement() {
                         name="estimated_duration"
                         value={editFormData.estimated_duration}
                         onChange={handleEditFormChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
                         min="0"
                         required
                       />
@@ -749,7 +732,7 @@ export default function TripsManagement() {
                         name="service_type_id"
                         value={editFormData.service_type_id}
                         onChange={handleEditFormChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
                         required
                       >
                         <option value="">Seleccionar servicio</option>
@@ -769,7 +752,7 @@ export default function TripsManagement() {
                         name="driver_id"
                         value={editFormData.driver_id}
                         onChange={handleEditFormChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
                         required
                       >
                         <option value="">Seleccionar conductor</option>
@@ -792,7 +775,7 @@ export default function TripsManagement() {
                         name="vehicle_category"
                         value={editFormData.vehicle_category}
                         onChange={handleEditFormChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
                         required
                       >
                         <option value="">Seleccionar categoría</option>
@@ -813,7 +796,7 @@ export default function TripsManagement() {
                         name="max_passengers"
                         value={editFormData.max_passengers}
                         onChange={handleEditFormChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
                         min="1"
                         max="50"
                         required
@@ -832,7 +815,7 @@ export default function TripsManagement() {
                         name="price"
                         value={editFormData.price}
                         onChange={handleEditFormChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
                         min="0"
                         step="0.01"
                         required
@@ -849,7 +832,7 @@ export default function TripsManagement() {
                       name="special_instructions"
                       value={editFormData.special_instructions}
                       onChange={handleEditFormChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
                       rows={3}
                       placeholder="Instrucciones adicionales para el conductor o el viaje"
                     />
@@ -935,7 +918,7 @@ export default function TripsManagement() {
             type={toast.type}
             isVisible={true}
             onClose={() => {
-              console.log('❌ Cerrando toast');
+              
               setToast(null);
             }}
           />

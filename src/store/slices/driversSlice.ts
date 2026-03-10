@@ -49,11 +49,11 @@ export const verifyAdminStatus = createAsyncThunk(
   'drivers/verifyAdmin',
   async (_, { rejectWithValue }) => {
     try {
-      console.log('👤 Verificando estado de admin...');
+      
       
       // Obtener usuario actual
       const { data: { user }, error: userError } = await supabase.auth.getUser();
-      console.log('🔑 Usuario actual:', user);
+      
       
       if (userError || !user) {
         return rejectWithValue('No hay usuario autenticado');
@@ -66,7 +66,7 @@ export const verifyAdminStatus = createAsyncThunk(
         .eq('id', user.id)
         .single();
       
-      console.log('👤 Perfil del usuario:', { data: profile, error: profileError });
+      
       
       return {
         user: user,
@@ -157,7 +157,7 @@ export const updateDriver = createAsyncThunk(
   'drivers/updateDriver',
   async ({ id, data }: { id: string; data: Partial<Driver> }, { rejectWithValue }) => {
     try {
-      console.log('🔄 Iniciando actualización de conductor:', { id, data });
+      
       
       // Convertir objetos a JSON strings para almacenar en la base de datos
       const dataToUpdate = {
@@ -173,7 +173,7 @@ export const updateDriver = createAsyncThunk(
         updated_at: new Date().toISOString()
       };
 
-      console.log('📝 Datos a actualizar:', dataToUpdate);
+      
 
       // Realizar la actualización directamente
       const { data: updatedData, error } = await supabase
@@ -191,7 +191,7 @@ export const updateDriver = createAsyncThunk(
         return rejectWithValue(`Error de base de datos: ${error.message}`);
       }
 
-      console.log('✅ Conductor actualizado exitosamente:', updatedData);
+      
       return updatedData;
     } catch (error) {
       console.error('💥 Error inesperado en updateDriver:', error);

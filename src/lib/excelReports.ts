@@ -9,64 +9,19 @@ interface ReportData {
 export const generateDetailedReport = (data: ReportData) => {
   const { reservations, trips, drivers } = data;
   
-  // Debug: Verificar los datos recibidos
-  console.log('🔍 Excel Generator Debug:');
-  console.log('Reservations received:', reservations.length);
-  console.log('Trips received:', trips.length);
-  console.log('Drivers received:', drivers.length);
-  
-  // Debug: Mostrar estructura de cada tipo de dato
-  if (reservations.length > 0) {
-    console.log('🔍 Sample reservation structure:', Object.keys(reservations[0]));
-    console.log('🔍 First reservation:', reservations[0]);
-  }
-  if (trips.length > 0) {
-    console.log('🔍 Sample trip structure:', Object.keys(trips[0]));
-    console.log('🔍 First trip:', trips[0]);
-  }
-  if (drivers.length > 0) {
-    console.log('🔍 Sample driver structure:', Object.keys(drivers[0]));
-    console.log('🔍 First driver:', drivers[0]);
-  }
+  // Debug eliminado para producción
   
   // Crear un nuevo workbook
   const workbook = XLSX.utils.book_new();
 
   // === HOJA 1: RESERVAS ===
   const reservationsData = reservations.map((reservation, index) => {
-    // Debug: Información de cada reserva
-    if (index < 3) { // Solo mostrar las primeras 3 para no saturar el log
-      console.log(`🔍 Procesando reserva ${index + 1}:`, {
-        id: reservation.id,
-        trip_id: reservation.trip_id,
-        status: reservation.status,
-        confirmation_code: reservation.confirmation_code
-      });
-    }
-    
     // Buscar el trip asociado a esta reserva
     const associatedTrip = trips.find(trip => trip.id === reservation.trip_id);
-    
-    if (index < 3) {
-      console.log(`🔍 Trip encontrado para reserva ${index + 1}:`, associatedTrip ? {
-        id: associatedTrip.id,
-        driver_id: associatedTrip.driver_id,
-        status: associatedTrip.status
-      } : 'No encontrado');
-    }
     
     // Buscar el conductor asociado al trip
     // Los trips vienen con el objeto driver incluido desde Supabase
     const associatedDriver = associatedTrip?.driver || null;
-
-    if (index < 3) {
-      console.log(`🔍 Driver encontrado para reserva ${index + 1}:`, associatedDriver ? {
-        id: associatedDriver.id,
-        full_name: associatedDriver.full_name,
-        phone: associatedDriver.phone
-      } : 'No encontrado');
-      console.log(`🔍 Trip completo:`, associatedTrip);
-    }
 
     // Formatear información del vehículo
     const vehicleInfo = associatedDriver?.vehicle_info 

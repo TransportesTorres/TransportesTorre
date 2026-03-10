@@ -144,81 +144,17 @@ const AdminDashboard = () => {
     dispatch(fetchDrivers({ includeInactive: true })); // Incluir conductores inactivos para gestión completa
   }, [dispatch]);
 
-  // Debug function para verificar estados de viajes
-  useEffect(() => {
-    console.log('🔍 Debug - Trips loaded:', trips.length);
-    console.log('🔍 Debug - Trip statuses:', trips.map(t => ({ 
-      id: t.id, 
-      status: t.status, 
-      departure_time: t.departure_time,
-      origin: t.origin,
-      destination: t.destination
-    })));
-    
-    const statusCounts = trips.reduce((acc, trip) => {
-      acc[trip.status] = (acc[trip.status] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
-    
-    console.log('🔍 Debug - Status counts:', statusCounts);
-    
-    // Debug específico para viajes completados
-    const completedTripsDebug = trips.filter(t => t.status === 'completed');
-    console.log('🔍 Debug - Completed trips details:', completedTripsDebug.map(t => ({
-      id: t.id,
-      status: t.status,
-      origin: t.origin,
-      destination: t.destination,
-      hasReservation: !!t.reservations,
-      reservationData: t.reservations,
-      driver: t.driver?.full_name
-    })));
-  }, [trips]);
+  // Debug eliminado para producción
 
   // Calcular estadísticas
   const pendingRequests = reservations.filter(reservation => 
     (reservation.status === 'pending' || reservation.status === 'assign_driver')
   );
 
-  // Debug para entender los status de reservas y viajes
-  console.log('🔍 Debug - Reservations status:', reservations.map(r => ({
-    id: r.id.slice(0, 8),
-    status: r.status,
-    confirmation_code: r.confirmation_code
-  })));
-  
-  console.log('🔍 Debug - Trips status:', trips.map(t => ({
-    id: t.id.slice(0, 8),
-    status: t.status,
-    origin: t.origin,
-    destination: t.destination,
-    hasReservations: !!t.reservations,
-    reservationsLength: Array.isArray(t.reservations) ? t.reservations.length : 'not-array'
-  })));
-
   const confirmedReservations = reservations.filter(r => r.status === 'confirmed');
   const activeTrips = trips.filter(t => t.status === 'booked' || t.status === 'assign_driver');
   const completedTrips = trips.filter(t => t.status === 'completed');
   const availableDrivers = drivers.filter(d => d.is_active);
-
-  console.log('📊 Debug - Counts:', {
-    totalReservations: reservations.length,
-    confirmedReservations: confirmedReservations.length,
-    totalTrips: trips.length,
-    activeTrips: activeTrips.length,
-    completedTrips: completedTrips.length
-  });
-
-  // Debug específico para viajes activos
-  console.log('🚀 Debug - Active trips details:', activeTrips.map(t => ({
-    id: t.id.slice(0, 8),
-    status: t.status,
-    origin: t.origin,
-    destination: t.destination,
-    hasReservations: !!t.reservations,
-    reservationsArray: Array.isArray(t.reservations) ? t.reservations : 'not-array',
-    reservationsCount: Array.isArray(t.reservations) ? t.reservations.length : 'unknown'
-  })));
 
   const filteredActiveTrips = activeTrips.filter(trip => {
     if (!searchTerm) return true; // Si no hay término de búsqueda, mostrar todos
@@ -232,16 +168,6 @@ const AdminDashboard = () => {
            reservation?.confirmation_code?.toLowerCase().includes(searchLower) ||
            reservation?.requester_name?.toLowerCase().includes(searchLower);
   });
-
-  // Debug log para viajes activos filtrados
-  console.log('🔎 Debug - Filtered active trips:', filteredActiveTrips.map(t => ({
-    id: t.id.slice(0, 8),
-    status: t.status,
-    origin: t.origin,
-    destination: t.destination,
-    searchTerm: searchTerm,
-    reservationsLength: Array.isArray(t.reservations) ? t.reservations.length : 'not-array'
-  })));
 
   // Calcular estadísticas de hoy
   const today = new Date().toISOString().split('T')[0];
@@ -303,26 +229,17 @@ const AdminDashboard = () => {
   );
 
   // Debug logs para entender el problema (movidos después de definir todas las variables)
-  console.log('🔍 Debug - Total trips:', trips.length);
-  console.log('🔍 Debug - Trip statuses:', trips.map(t => ({ id: t.id, status: t.status })));
-  console.log('🔍 Debug - Completed trips count:', completedTrips.length);
-  console.log('🔍 Debug - Completed trips:', completedTrips);
-  console.log('🔍 Debug - Filtered completed trips count:', filteredCompletedTrips.length);
-  console.log('🔍 Debug - Search term:', searchTerm);
-  console.log('🔍 Debug - View mode:', viewMode);
+  
+  
+  
+  
+  
+  
+  
   
   // Debug específico para viajes completados y sus reservas
   completedTrips.forEach((trip, index) => {
-    console.log(`🔍 Debug - Trip ${index + 1}:`, {
-      id: trip.id,
-      status: trip.status,
-      origin: trip.origin,
-      destination: trip.destination,
-      hasReservation: !!trip.reservations,
-      reservationData: trip.reservations,
-      driver: trip.driver?.full_name,
-      departure_time: trip.departure_time
-    });
+    
   });
 
   // Función de prueba para completar un viaje
@@ -337,7 +254,7 @@ const AdminDashboard = () => {
     }
     
     const testTrip = confirmedTrips[0];
-    console.log('🧪 Completando viaje de prueba:', testTrip.id);
+    
     
     try {
       await dispatch(completeTrip(testTrip.id));
@@ -496,10 +413,10 @@ const AdminDashboard = () => {
 
   // Función para verificar estado de admin
   const handleVerifyAdmin = async () => {
-    console.log('👤 Verificando estado de admin...');
+    
     try {
       const result = await dispatch(verifyAdminStatus());
-      console.log('📋 Resultado verificación admin:', result);
+      
       
       if (verifyAdminStatus.fulfilled.match(result)) {
         const { isAdmin, profile } = result.payload;
@@ -524,10 +441,10 @@ const AdminDashboard = () => {
 
   // Función de prueba para verificar acceso a drivers
   const handleTestDriversAccess = async () => {
-    console.log('🧪 Probando acceso a tabla drivers...');
+    
     try {
       const result = await dispatch(testDriversAccess());
-      console.log('📋 Resultado de prueba:', result);
+      
       
       if (testDriversAccess.fulfilled.match(result)) {
         setToast({
@@ -555,14 +472,11 @@ const AdminDashboard = () => {
     try {
       if (selectedDriver?.id) {
         // Editar conductor existente
-        console.log('🔧 Editando conductor:', {
-          id: selectedDriver.id,
-          formData: driverForm
-        });
+        
         
         const result = await dispatch(updateDriver({ id: selectedDriver.id, data: driverForm }));
         
-        console.log('📋 Resultado de actualización:', result);
+        
         
         // Verificar si la acción fue rechazada
         if (updateDriver.rejected.match(result)) {
@@ -576,7 +490,7 @@ const AdminDashboard = () => {
         });
       } else {
         // Crear nuevo conductor
-        console.log('➕ Creando nuevo conductor:', driverForm);
+        
         
         const result = await dispatch(createDriver(driverForm));
         
@@ -671,7 +585,7 @@ const AdminDashboard = () => {
 
   // Función para recargar datos
   const reloadData = () => {
-    console.log('🔄 Recargando datos...');
+    
     dispatch(fetchReservations({}));
     dispatch(fetchTrips({ all: true }));
     dispatch(fetchDrivers({ includeInactive: true }));
@@ -679,7 +593,7 @@ const AdminDashboard = () => {
 
   // Función para manejar clics en las cards
   const handleCardClick = (mode: ViewMode) => {
-    console.log('🖱️ Card clicked:', mode);
+    
     setViewMode(mode);
     
     // Recargar datos cuando se entra a viajes completados
@@ -737,21 +651,20 @@ const AdminDashboard = () => {
         .single();
       
       if (error) {
-        console.log('❌ Error buscando reserva para trip:', tripId, error);
+        
         return null;
       }
       
-      console.log('✅ Reserva encontrada para trip:', tripId, data);
+      
       return data;
     } catch (error) {
-      console.log('❌ Error general buscando reserva:', error);
       return null;
     }
   };
 
   // Función para recargar datos con reservas
   const reloadDataWithReservations = async () => {
-    console.log('🔄 Recargando datos con reservas...');
+    
     dispatch(fetchReservations({}));
     dispatch(fetchTrips({ all: true }));
     dispatch(fetchDrivers({ includeInactive: true }));
@@ -762,13 +675,8 @@ const AdminDashboard = () => {
         t.status === 'completed' && !t.reservations
       );
       
-      console.log('🔍 Viajes completados sin reservas:', completedTripsWithoutReservations.length);
-      
       for (const trip of completedTripsWithoutReservations) {
-        const reservation = await fetchReservationForTrip(trip.id);
-        if (reservation) {
-          console.log('✅ Reserva encontrada para viaje:', trip.id, reservation);
-        }
+        await fetchReservationForTrip(trip.id);
       }
     }, 1000);
   };
@@ -1611,7 +1519,7 @@ const AdminDashboard = () => {
         {/* Modal para asignar conductor */}
         {showApprovalModal && selectedRequest && (
           <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-            <div className="relative top-20 mx-auto p-5 border w-11/12 max-w-2xl shadow-lg rounded-md bg-white">
+            <div className="relative top-20 mx-auto p-5 border w-11/12 max-w-2xl shadow-lg rounded-md bg-white text-gray-900">
               <div className="mt-3">
                 <h3 className="text-lg font-bold text-gray-900 mb-4">
                   Asignar Conductor - {selectedRequest.confirmation_code}
@@ -1624,7 +1532,7 @@ const AdminDashboard = () => {
                   <select
                     value={selectedDriverId}
                     onChange={(e) => setSelectedDriverId(e.target.value)}
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
                   >
                     <option value="">Seleccionar conductor...</option>
                     {availableDrivers.map((driver) => (
@@ -1662,7 +1570,7 @@ const AdminDashboard = () => {
         {/* Modal para detalles de viaje */}
         {showTripModal && selectedTrip && (
           <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-            <div className="relative top-20 mx-auto p-5 border w-11/12 max-w-2xl shadow-lg rounded-md bg-white">
+            <div className="relative top-20 mx-auto p-5 border w-11/12 max-w-2xl shadow-lg rounded-md bg-white text-gray-900">
               <div className="mt-3">
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="text-lg font-bold text-gray-900">
@@ -1688,7 +1596,7 @@ const AdminDashboard = () => {
                   
                   return (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                      <div>
+                      <div className="text-gray-900">
                         <h4 className="font-semibold text-gray-700 mb-2">Información del Cliente</h4>
                         <p><strong>Nombre:</strong> {reservation?.requester_name || reservation?.profiles?.full_name || 'N/A'}</p>
                         <p><strong>Email:</strong> {reservation?.requester_email || reservation?.profiles?.email || 'N/A'}</p>
@@ -1696,7 +1604,7 @@ const AdminDashboard = () => {
                         <p><strong>Empresa:</strong> {reservation?.company_name || 'N/A'}</p>
                       </div>
                       
-                      <div>
+                      <div className="text-gray-900">
                         <h4 className="font-semibold text-gray-700 mb-2">Información del Conductor</h4>
                         <p><strong>Nombre:</strong> {selectedTrip.driver?.full_name || 'No asignado'}</p>
                         <p><strong>Teléfono:</strong> {selectedTrip.driver?.phone || 'N/A'}</p>
@@ -1704,7 +1612,7 @@ const AdminDashboard = () => {
                         <p><strong>Licencia:</strong> {selectedTrip.driver?.license_number || 'N/A'}</p>
                       </div>
                       
-                      <div>
+                      <div className="text-gray-900">
                         <h4 className="font-semibold text-gray-700 mb-2">Detalles del Viaje</h4>
                         <p><strong>Origen:</strong> {selectedTrip.origin || reservation?.pickup_location || 'N/A'}</p>
                         <p><strong>Destino:</strong> {selectedTrip.destination || reservation?.dropoff_location || 'N/A'}</p>
@@ -1712,7 +1620,7 @@ const AdminDashboard = () => {
                         <p><strong>Hora:</strong> {formatTime(selectedTrip.departure_time || reservation?.pickup_time)}</p>
                       </div>
                       
-                      <div>
+                      <div className="text-gray-900">
                         <h4 className="font-semibold text-gray-700 mb-2">Información Adicional</h4>
                         <p><strong>Pasajeros:</strong> {selectedTrip.max_passengers || reservation?.passenger_count || 'N/A'}</p>
                         <p><strong>Vuelo:</strong> {reservation?.flight_number || 'N/A'}</p>
@@ -1740,7 +1648,7 @@ const AdminDashboard = () => {
                   return reservation?.special_requirements && (
                     <div className="mt-4">
                       <h4 className="font-semibold text-gray-700 mb-2">Requerimientos Especiales</h4>
-                      <p className="text-sm text-gray-600 bg-gray-50 p-3 rounded">
+                      <p className="text-sm text-gray-900 bg-gray-50 p-3 rounded">
                         {reservation.special_requirements}
                       </p>
                     </div>
@@ -1792,7 +1700,7 @@ const AdminDashboard = () => {
         {/* Modal para conductor */}
         {showDriverModal && (
           <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-            <div className="relative top-10 mx-auto p-5 border w-11/12 max-w-4xl shadow-lg rounded-md bg-white">
+            <div className="relative top-10 mx-auto p-5 border w-11/12 max-w-4xl shadow-lg rounded-md bg-white text-gray-900">
               <div className="mt-3">
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="text-lg font-bold text-gray-900">
@@ -1825,7 +1733,7 @@ const AdminDashboard = () => {
                           required
                           value={driverForm.full_name}
                           onChange={(e) => setDriverForm({...driverForm, full_name: e.target.value})}
-                          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
                         />
                       </div>
                       
@@ -1838,7 +1746,7 @@ const AdminDashboard = () => {
                           required
                           value={driverForm.email}
                           onChange={(e) => setDriverForm({...driverForm, email: e.target.value})}
-                          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
                         />
                       </div>
                       
@@ -1851,7 +1759,7 @@ const AdminDashboard = () => {
                           required
                           value={driverForm.phone}
                           onChange={(e) => setDriverForm({...driverForm, phone: e.target.value})}
-                          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
                         />
                       </div>
                       
@@ -1864,7 +1772,7 @@ const AdminDashboard = () => {
                           required
                           value={driverForm.license_number}
                           onChange={(e) => setDriverForm({...driverForm, license_number: e.target.value})}
-                          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
                         />
                       </div>
                       
@@ -1875,13 +1783,16 @@ const AdminDashboard = () => {
                         <select
                           value={driverForm.license_type}
                           onChange={(e) => setDriverForm({...driverForm, license_type: e.target.value})}
-                          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
                         >
-                          <option value="B">Clase B</option>
-                          <option value="A-1">Clase A-1</option>
                           <option value="A-2">Clase A-2</option>
                           <option value="A-3">Clase A-3</option>
+                          <option value="A-4">Clase A-4</option>
+                          <option value="A-5">Clase A-5</option>
                         </select>
+                        <span className="block text-xs text-red-600 mt-1">
+                          Valores permitidos: A-2, A-3, A-4, A-5.
+                        </span>
                       </div>
                       
                       <div>
@@ -1893,7 +1804,7 @@ const AdminDashboard = () => {
                           min="0"
                           value={driverForm.experience_years}
                           onChange={(e) => setDriverForm({...driverForm, experience_years: parseInt(e.target.value)})}
-                          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
                         />
                       </div>
                       
@@ -1926,7 +1837,7 @@ const AdminDashboard = () => {
                             ...driverForm, 
                             vehicle_info: {...driverForm.vehicle_info, brand: e.target.value}
                           })}
-                          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
                         />
                       </div>
                       
@@ -1942,7 +1853,7 @@ const AdminDashboard = () => {
                             ...driverForm, 
                             vehicle_info: {...driverForm.vehicle_info, model: e.target.value}
                           })}
-                          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
                         />
                       </div>
                       
@@ -1960,7 +1871,7 @@ const AdminDashboard = () => {
                             ...driverForm, 
                             vehicle_info: {...driverForm.vehicle_info, year: parseInt(e.target.value)}
                           })}
-                          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
                         />
                       </div>
                       
@@ -1976,7 +1887,7 @@ const AdminDashboard = () => {
                             ...driverForm, 
                             vehicle_info: {...driverForm.vehicle_info, plate: e.target.value.toUpperCase()}
                           })}
-                          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
                         />
                       </div>
                       
@@ -1991,7 +1902,7 @@ const AdminDashboard = () => {
                             ...driverForm, 
                             vehicle_info: {...driverForm.vehicle_info, color: e.target.value}
                           })}
-                          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
                         />
                       </div>
                       
@@ -2005,7 +1916,7 @@ const AdminDashboard = () => {
                             ...driverForm, 
                             vehicle_info: {...driverForm.vehicle_info, category: e.target.value}
                           })}
-                          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
                         >
                           <option value="sedan_ejecutivo">Sedán Ejecutivo</option>
                           <option value="suv_ejecutiva">SUV Ejecutiva</option>
@@ -2027,7 +1938,7 @@ const AdminDashboard = () => {
                             ...driverForm, 
                             vehicle_info: {...driverForm.vehicle_info, max_passengers: parseInt(e.target.value)}
                           })}
-                          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
                         />
                       </div>
                       
@@ -2043,7 +1954,7 @@ const AdminDashboard = () => {
                             ...driverForm, 
                             vehicle_info: {...driverForm.vehicle_info, kilometers: parseInt(e.target.value)}
                           })}
-                          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
                         />
                       </div>
                       
@@ -2106,7 +2017,7 @@ const AdminDashboard = () => {
         {/* Modal para detalles de solicitud */}
         {selectedRequest && !showApprovalModal && (
           <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-            <div className="relative top-20 mx-auto p-5 border w-11/12 max-w-2xl shadow-lg rounded-md bg-white">
+            <div className="relative top-20 mx-auto p-5 border w-11/12 max-w-2xl shadow-lg rounded-md bg-white text-gray-900">
               <div className="mt-3">
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="text-lg font-bold text-gray-900">
@@ -2121,7 +2032,7 @@ const AdminDashboard = () => {
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                  <div>
+                  <div className="text-gray-900">
                     <h4 className="font-semibold text-gray-700 mb-2">Información del Cliente</h4>
                     <p><strong>Nombre:</strong> {selectedRequest.requester_name}</p>
                     <p><strong>Email:</strong> {selectedRequest.requester_email}</p>
@@ -2129,7 +2040,7 @@ const AdminDashboard = () => {
                     <p><strong>Empresa:</strong> {selectedRequest.company_name || 'No especificada'}</p>
                   </div>
                   
-                  <div>
+                  <div className="text-gray-900">
                     <h4 className="font-semibold text-gray-700 mb-2">Detalles del Viaje</h4>
                     <p><strong>Origen:</strong> {selectedRequest.pickup_location}</p>
                     {selectedRequest.trip_request_origin !== selectedRequest.pickup_location && selectedRequest.trip_request_origin !== 'Por definir' && (
@@ -2143,13 +2054,13 @@ const AdminDashboard = () => {
                     <p><strong>Hora:</strong> {formatTime(selectedRequest.pickup_time)}</p>
                   </div>
                   
-                  <div>
+                  <div className="text-gray-900">
                     <h4 className="font-semibold text-gray-700 mb-2">Información del Vuelo</h4>
                     <p><strong>Número de Vuelo:</strong> {selectedRequest.flight_number || 'No especificado'}</p>
                     <p><strong>Tipo:</strong> {selectedRequest.flight_type || 'No especificado'}</p>
                   </div>
                   
-                  <div>
+                  <div className="text-gray-900">
                     <h4 className="font-semibold text-gray-700 mb-2">Pasajeros y Equipaje</h4>
                     <p><strong>Pasajeros:</strong> {selectedRequest.passenger_count}</p>
                     <p><strong>Equipaje de mano:</strong> {selectedRequest.luggage_hand || 0}</p>
@@ -2160,7 +2071,7 @@ const AdminDashboard = () => {
                 {selectedRequest.special_requirements && (
                   <div className="mt-4">
                     <h4 className="font-semibold text-gray-700 mb-2">Requerimientos Especiales</h4>
-                    <p className="text-sm text-gray-600 bg-gray-50 p-3 rounded">
+                    <p className="text-sm text-gray-900 bg-gray-50 p-3 rounded">
                       {selectedRequest.special_requirements}
                     </p>
                   </div>
@@ -2169,7 +2080,7 @@ const AdminDashboard = () => {
                 {selectedRequest.additional_services && (
                   <div className="mt-4">
                     <h4 className="font-semibold text-gray-700 mb-2">Servicios Adicionales</h4>
-                    <p className="text-sm text-gray-600 bg-gray-50 p-3 rounded">
+                    <p className="text-sm text-gray-900 bg-gray-50 p-3 rounded">
                       {selectedRequest.additional_services}
                     </p>
                   </div>
