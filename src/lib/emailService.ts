@@ -20,7 +20,10 @@ interface ReservationEmailData {
   flight_number?: string;
   special_requirements?: string;
   driver_name?: string;
+  driver_phone?: string;
   vehicle_info?: string;
+  pickup_time?: string;
+  service_date?: string;
 }
 
 class EmailService {
@@ -331,6 +334,73 @@ class EmailService {
                 <div class="footer">
                     <p>¡Buen viaje y manejo seguro!</p>
                     <p>© 2024 Transportes Torres SpA</p>
+                </div>
+            </div>
+        </body>
+        </html>
+        `
+      },
+
+      driver_assigned: {
+        subject: '🚗 Conductor Asignado - {{confirmation_code}} | Transportes Torres',
+        html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <style>
+                body { font-family: Arial, sans-serif; color: #333; line-height: 1.6; margin: 0; padding: 0; }
+                .container { max-width: 600px; margin: 0 auto; background: #ffffff; }
+                .header { background: #2563eb; color: white; padding: 30px 20px; text-align: center; }
+                .content { padding: 30px 20px; }
+                .info-box { background: #f8fafc; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #2563eb; }
+                .driver { background: #ecfeff; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #0ea5e9; }
+                .footer { background: #1f2937; color: #e5e7eb; padding: 20px; text-align: center; }
+                .highlight { color: #2563eb; font-weight: bold; }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h1>🚗 Transportes Torres</h1>
+                    <h2>Conductor Asignado</h2>
+                </div>
+                
+                <div class="content">
+                    <p>Estimado/a <strong>{{client_name}}</strong>,</p>
+                    <p>Ya tenemos conductor asignado para tu viaje.</p>
+                    
+                    <div class="driver">
+                        <h3>👤 Datos del Conductor</h3>
+                        <p><strong>Nombre:</strong> {{driver_name}}</p>
+                        {{#if driver_phone}}
+                        <p><strong>📞 Teléfono:</strong> {{driver_phone}}</p>
+                        {{/if}}
+                        {{#if vehicle_info}}
+                        <p><strong>🚙 Vehículo:</strong> {{vehicle_info}}</p>
+                        {{/if}}
+                    </div>
+                    
+                    <div class="info-box">
+                        <h3>📋 Detalles del Viaje</h3>
+                        <p><strong>Código:</strong> <span class="highlight">{{confirmation_code}}</span></p>
+                        <p><strong>📍 Origen:</strong> {{pickup_location}}</p>
+                        <p><strong>📍 Destino:</strong> {{dropoff_location}}</p>
+                        <p><strong>👥 Pasajeros:</strong> {{passenger_count}}</p>
+                        {{#if service_date}}
+                        <p><strong>📅 Fecha:</strong> {{service_date}}</p>
+                        {{/if}}
+                        {{#if pickup_time}}
+                        <p><strong>🕐 Hora:</strong> {{pickup_time}}</p>
+                        {{/if}}
+                    </div>
+                    
+                    <p>El conductor te contactará 30 minutos antes del viaje para coordinar el punto de encuentro.</p>
+                </div>
+                
+                <div class="footer">
+                    <p>© 2024 Transportes Torres SpA</p>
+                    <p>Gracias por confiar en nosotros</p>
                 </div>
             </div>
         </body>

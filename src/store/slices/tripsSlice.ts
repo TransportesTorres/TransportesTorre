@@ -548,11 +548,11 @@ export const completeTrip = createAsyncThunk(
 
       console.log('✅ Estados actualizados correctamente');
 
-      // 3. Enviar correo de finalización al usuario con link de rating
+      // 3. Preparar datos de notificación y enviar correo de finalización
       console.log('📧 Preparando correo de finalización...');
       try {
         const ratingUrl = `${window.location.origin}/rating/${reservation.id}`;
-        
+
         const reservationData = {
           client_name: user.full_name,
           confirmation_code: reservation.confirmation_code,
@@ -597,6 +597,53 @@ export const completeTrip = createAsyncThunk(
       } catch (emailError) {
         console.error('❌ Error en el proceso de correo:', emailError);
         // No fallar todo el proceso por un error de correo
+      }
+
+      // 4. Enviar WhatsApp de finalización (sin duplicar email)
+      try {
+        const recipientPhone = reservation.contact_phone || user.phone;
+        if (recipientPhone) {
+          const whatsappResponse = await fetch('/api/notifications/send', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              recipientEmail: user.email,
+              recipientPhone,
+              templateName: 'trip_completed',
+              notificationData: {
+                client_name: user.full_name,
+                confirmation_code: reservation.confirmation_code,
+                pickup_location: reservation.pickup_location,
+                dropoff_location: reservation.dropoff_location,
+                passenger_count: reservation.passenger_count,
+                contact_phone: reservation.contact_phone,
+                flight_number: reservation.flight_number,
+                special_requirements: reservation.special_requirements,
+                driver_name: tripUpdate.data.driver?.full_name,
+                vehicle_info: tripUpdate.data.driver?.vehicle_info 
+                  ? `${tripUpdate.data.driver.vehicle_info.brand} ${tripUpdate.data.driver.vehicle_info.model}`
+                  : undefined,
+                pickup_time: reservation.pickup_time,
+                service_date: reservation.service_date,
+                rating_url: `${window.location.origin}/rating/${reservation.id}`
+              },
+              sendEmail: false
+            })
+          });
+
+          const whatsappResult = await whatsappResponse.json();
+          if (whatsappResult.success) {
+            console.log('✅ WhatsApp de finalización enviado a:', recipientPhone);
+          } else {
+            console.error('❌ Error enviando WhatsApp de finalización:', whatsappResult.error || whatsappResult);
+          }
+        } else {
+          console.log('⚠️ No hay teléfono del cliente, se omite WhatsApp de finalización');
+        }
+      } catch (whatsappError) {
+        console.error('❌ Error en el proceso de WhatsApp:', whatsappError);
       }
 
       console.log('✅ completeTrip finalizado exitosamente');
