@@ -419,6 +419,9 @@ export const cancelTrip = createAsyncThunk(
 
           
 
+          const { data: session } = await supabase.auth.getSession();
+          const token = session.session?.access_token;
+
           // Enviar correos en paralelo
           const emailPromises = [];
 
@@ -429,6 +432,7 @@ export const cancelTrip = createAsyncThunk(
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
+                ...(token ? { Authorization: `Bearer ${token}` } : {})
               },
               body: JSON.stringify({
                 templateName: 'trip_cancelled',
@@ -446,6 +450,7 @@ export const cancelTrip = createAsyncThunk(
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json',
+                  ...(token ? { Authorization: `Bearer ${token}` } : {})
                 },
                 body: JSON.stringify({
                   templateName: 'trip_cancelled',
@@ -574,14 +579,17 @@ export const completeTrip = createAsyncThunk(
         
         
 
-        const emailResponse = await fetch('/api/email/send-simple', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            templateName: 'trip_completed',
-            recipientEmail: user.email,
+          const { data: session } = await supabase.auth.getSession();
+          const token = session.session?.access_token;
+          const emailResponse = await fetch('/api/email/send-simple', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              ...(token ? { Authorization: `Bearer ${token}` } : {})
+            },
+            body: JSON.stringify({
+              templateName: 'trip_completed',
+              recipientEmail: user.email,
             reservationData
           }),
         });
@@ -603,10 +611,13 @@ export const completeTrip = createAsyncThunk(
       try {
         const recipientPhone = reservation.contact_phone || user.phone;
         if (recipientPhone) {
+          const { data: session } = await supabase.auth.getSession();
+          const token = session.session?.access_token;
           const whatsappResponse = await fetch('/api/notifications/send', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
+              ...(token ? { Authorization: `Bearer ${token}` } : {})
             },
             body: JSON.stringify({
               recipientEmail: user.email,

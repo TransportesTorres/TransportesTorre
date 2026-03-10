@@ -1,6 +1,7 @@
 // Helper functions para integrar notificaciones (Email + WhatsApp) con Redux
 
 import { NotificationData, NotificationTemplate } from './notificationService';
+import { getAuthHeaders } from './authHeaders';
 
 export interface NotificationRequest {
   recipientEmail: string;
@@ -37,10 +38,12 @@ export async function sendNotification(
   notificationData: NotificationData
 ): Promise<NotificationResponse> {
   try {
+    const authHeaders = await getAuthHeaders();
     const response = await fetch('/api/notifications/send', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        ...authHeaders
       },
       body: JSON.stringify({
         recipientEmail,
@@ -178,8 +181,10 @@ export async function verifyNotificationConfiguration(): Promise<{
   error?: string;
 }> {
   try {
+    const authHeaders = await getAuthHeaders();
     const response = await fetch('/api/notifications/send', {
       method: 'GET',
+      headers: authHeaders,
     });
 
     const data = await response.json();
