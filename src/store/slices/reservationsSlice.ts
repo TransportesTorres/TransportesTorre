@@ -121,7 +121,7 @@ export const createReservation = createAsyncThunk(
 
       // Enviar notificaciones (Email + WhatsApp) al cliente y admin
       try {
-        console.log('� Enviando notificaciones de nueva reserva...');
+        
         
         const notificationData = {
           client_name: reservation.profiles?.full_name || reservation.requester_name || 'Cliente',
@@ -140,12 +140,7 @@ export const createReservation = createAsyncThunk(
         const clientEmail = reservation.profiles?.email || reservation.requester_email;
         const clientPhone = reservation.contact_phone || reservation.profiles?.phone;
         
-        console.log('📞 Debug - Client contact info:', {
-          email: clientEmail,
-          phone: clientPhone,
-          contact_phone: reservation.contact_phone,
-          profile_phone: reservation.profiles?.phone
-        });
+        
         
         if (clientEmail) {
           const clientResult = await sendReservationCreatedNotification(
@@ -154,43 +149,27 @@ export const createReservation = createAsyncThunk(
             notificationData
           );
           
-          console.log('📱 Debug - Notification result:', clientResult);
-          
           if (clientResult.success) {
-            console.log('✅ Notificaciones enviadas al cliente');
-            if (clientResult.results?.email.success) console.log('  ✓ Email enviado');
-            if (clientResult.results?.whatsapp.success) console.log('  ✓ WhatsApp enviado');
-            if (clientResult.results?.whatsapp.skipped) console.log('  ⚠️ WhatsApp omitido:', clientResult.results.whatsapp.reason);
           } else {
             console.error('❌ Error en notificaciones al cliente:', clientResult.error);
           }
         }
 
         // 2. Notificar al admin (Email + WhatsApp)
-        const adminEmails = (process.env.NEXT_PUBLIC_ADMIN_EMAILS || 'torres.transportes.spa@gmail.com')
-          .split(',')
-          .map((value) => value.trim())
-          .filter(Boolean);
-        const adminPhones = (process.env.NEXT_PUBLIC_ADMIN_PHONES || '')
-          .split(',')
-          .map((value) => value.trim())
-          .filter(Boolean);
+        const adminResponse = await fetch('/api/notifications/send-admin', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            templateName: 'new_reservation_admin',
+            notificationData
+          })
+        });
 
-        const adminResults = await Promise.all(
-          adminEmails.map((adminEmail, index) =>
-            sendNewReservationAdminNotification(
-              adminEmail,
-              adminPhones[index],
-              notificationData
-            )
-          )
-        );
-
-        const allAdminsOk = adminResults.every((result) => result.success);
-        if (allAdminsOk) {
-          console.log('✅ Notificaciones enviadas al admin');
-        } else {
-          console.error('❌ Error en notificaciones al admin:', adminResults);
+        if (!adminResponse.ok) {
+          const adminResult = await adminResponse.json().catch(() => ({}));
+          console.error('❌ Error en notificaciones al admin:', adminResult);
         }
 
       } catch (notificationError) {
@@ -211,7 +190,7 @@ export const confirmReservation = createAsyncThunk(
   'reservations/confirmReservation',
   async ({ reservationId }: { reservationId: string }, { rejectWithValue }) => {
     try {
-      console.log('🔄 Iniciando confirmación de reserva:', reservationId);
+      
 
       // Obtener información de la reserva
       const { data: reservation, error: fetchError } = await supabase
@@ -259,7 +238,7 @@ export const confirmReservation = createAsyncThunk(
 
       // Enviar notificaciones de confirmación (Email + WhatsApp) al cliente
       try {
-        console.log('� Enviando notificaciones de confirmación al cliente...');
+        
 
         const notificationData = {
           client_name: reservation.profiles?.full_name || reservation.requester_name || 'Cliente',
@@ -284,11 +263,7 @@ export const confirmReservation = createAsyncThunk(
             notificationData
           );
           
-          if (result.success) {
-            console.log('✅ Notificaciones de confirmación enviadas al cliente');
-            if (result.results?.email.success) console.log('  ✓ Email enviado');
-            if (result.results?.whatsapp.success) console.log('  ✓ WhatsApp enviado');
-          } else {
+          if (!result.success) {
             console.error('❌ Error en notificaciones de confirmación:', result.error);
           }
         }
@@ -309,7 +284,7 @@ export const assignDriverToReservation = createAsyncThunk(
   'reservations/assignDriverToReservation',
   async ({ reservationId, driverId }: { reservationId: string; driverId: string }, { rejectWithValue }) => {
     try {
-      console.log('🔄 Iniciando asignación de conductor:', { reservationId, driverId });
+      
 
       // Obtener información de la reserva
       const { data: reservation, error: fetchError } = await supabase
@@ -396,7 +371,7 @@ export const assignDriverToReservation = createAsyncThunk(
 
       // Enviar notificaciones (Email + WhatsApp) al cliente Y al conductor
       try {
-        console.log('� Enviando notificaciones de asignación...');
+        
 
         const notificationData = {
           client_name: reservation.profiles?.full_name || reservation.requester_name || 'Cliente',
@@ -427,11 +402,7 @@ export const assignDriverToReservation = createAsyncThunk(
             notificationData
           );
           
-          if (clientResult.success) {
-            console.log('✅ Notificaciones enviadas al cliente');
-            if (clientResult.results?.email.success) console.log('  ✓ Email enviado');
-            if (clientResult.results?.whatsapp.success) console.log('  ✓ WhatsApp enviado');
-          } else {
+          if (!clientResult.success) {
             console.error('❌ Error en notificaciones al cliente:', clientResult.error);
           }
         }
@@ -444,11 +415,7 @@ export const assignDriverToReservation = createAsyncThunk(
             notificationData
           );
           
-          if (driverResult.success) {
-            console.log('✅ Notificaciones enviadas al conductor');
-            if (driverResult.results?.email.success) console.log('  ✓ Email enviado');
-            if (driverResult.results?.whatsapp.success) console.log('  ✓ WhatsApp enviado');
-          } else {
+          if (!driverResult.success) {
             console.error('❌ Error en notificaciones al conductor:', driverResult.error);
           }
         }
@@ -644,7 +611,7 @@ export const updateReservationStatus = createAsyncThunk(
 
         // Enviar emails de confirmación
         try {
-          console.log('📧 Enviando emails de confirmación...');
+          
 
           // Preparar datos para los emails
           const clientEmailData = {
@@ -681,7 +648,7 @@ export const updateReservationStatus = createAsyncThunk(
                 reservationData: clientEmailData
               }),
             });
-            console.log('✅ Email enviado al cliente:', clientEmail);
+            
           }
 
           // Email al conductor
@@ -697,10 +664,10 @@ export const updateReservationStatus = createAsyncThunk(
                 reservationData: clientEmailData
               }),
             });
-            console.log('✅ Email enviado al conductor:', assignedDriver.email);
+            
           }
 
-          console.log('✅ Todos los emails enviados correctamente');
+          
 
         } catch (emailError) {
           console.error('❌ Error enviando emails:', emailError);
@@ -737,7 +704,7 @@ export const updateReservationStatus = createAsyncThunk(
         // Enviar email de rechazo si es necesario
         if (status === 'rejected') {
           try {
-            console.log('📧 Enviando email de rechazo...');
+            
 
             const rejectEmailData = {
               client_name: reservation.profiles?.full_name || reservation.requester_name || 'Cliente',
@@ -766,7 +733,7 @@ export const updateReservationStatus = createAsyncThunk(
                   reservationData: rejectEmailData
                 }),
               });
-              console.log('✅ Email de rechazo enviado al cliente:', clientEmail);
+              
             }
 
           } catch (emailError) {

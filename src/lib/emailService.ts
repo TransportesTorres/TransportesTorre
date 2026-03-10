@@ -564,7 +564,7 @@ class EmailService {
   // Obtener datos de reserva completos
   async getReservationData(reservationId: string): Promise<ReservationEmailData | null> {
     try {
-      console.log('Fetching reservation data for ID:', reservationId);
+      
       
       // Primero obtener la reserva básica
       const { data: reservation, error: reservationError } = await this.supabaseClient
@@ -578,7 +578,7 @@ class EmailService {
         return null;
       }
 
-      console.log('Reservation found:', reservation);
+      
 
       // Intentar obtener datos del usuario
       let userEmail = '';
@@ -641,7 +641,7 @@ class EmailService {
         vehicle_info: vehicleInfo
       };
 
-      console.log('Final reservation data:', reservationData);
+      
       return reservationData;
 
     } catch (error) {

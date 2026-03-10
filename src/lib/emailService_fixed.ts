@@ -291,7 +291,7 @@ class EmailService {
         vehicle_info: vehicleInfo
       };
 
-      console.log('Final reservation data:', reservationData);
+      
       return reservationData;
 
     } catch (error) {

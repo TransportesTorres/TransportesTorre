@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
+import { cookies } from 'next/headers';
 import nodemailer from 'nodemailer';
 
 // Force this route to be dynamic
@@ -446,6 +448,12 @@ function generateEmailTemplate(templateName: string, data: SimpleReservationData
 
 export async function POST(request: NextRequest) {
   try {
+    const supabase = createRouteHandlerClient({ cookies });
+    const { data: authData, error: authError } = await supabase.auth.getUser();
+    if (authError || !authData?.user) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
+
     const { templateName, recipientEmail, reservationData } = await request.json();
 
     if (!templateName || !recipientEmail || !reservationData) {
@@ -455,7 +463,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log('Sending simple email:', { templateName, recipientEmail, reservationData });
+    
 
     const template = generateEmailTemplate(templateName, reservationData);
     
@@ -478,7 +486,7 @@ export async function POST(request: NextRequest) {
 
     const info = await transporter.sendMail(mailOptions);
 
-    console.log('Email sent successfully:', info.messageId);
+    
 
     return NextResponse.json({ 
       success: true,

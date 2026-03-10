@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
+import { cookies } from 'next/headers';
 import notificationService, { NotificationData, NotificationTemplate } from '@/lib/notificationService';
 
 // Force this route to be dynamic
@@ -6,6 +8,12 @@ export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
   try {
+    const supabase = createRouteHandlerClient({ cookies });
+    const { data: authData, error: authError } = await supabase.auth.getUser();
+    if (authError || !authData?.user) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
+
     const body = await request.json();
     const { 
       recipientEmail, 
@@ -27,11 +35,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Enviar notificaciones
-    console.log('🔔 Enviando notificaciones:', {
-      email: recipientEmail,
-      phone: recipientPhone || 'N/A',
-      template: templateName
-    });
+    
 
     const results = await notificationService.sendNotification(
       recipientEmail,
@@ -86,6 +90,12 @@ export async function POST(request: NextRequest) {
 // API para verificar configuración
 export async function GET() {
   try {
+    const supabase = createRouteHandlerClient({ cookies });
+    const { data: authData, error: authError } = await supabase.auth.getUser();
+    if (authError || !authData?.user) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
+
     const config = notificationService.getConfig();
     
     return NextResponse.json({

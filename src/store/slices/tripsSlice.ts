@@ -272,7 +272,7 @@ export const getTripReservationUser = createAsyncThunk(
   'trips/getTripReservationUser',
   async (tripId: string, { rejectWithValue }) => {
     try {
-      console.log('🔍 Buscando usuario para trip:', tripId);
+      
       
       const { data, error } = await supabase
         .from('reservations')
@@ -298,7 +298,7 @@ export const getTripReservationUser = createAsyncThunk(
         .eq('status', 'confirmed') // Solo reservas confirmadas
         .single();
 
-      console.log('🔍 Query result:', { data, error });
+      
 
       if (error) {
         console.error('❌ Error en query:', error);
@@ -315,7 +315,7 @@ export const getTripReservationUser = createAsyncThunk(
         user: data.profiles
       };
 
-      console.log('✅ Usuario encontrado:', result);
+      
       return result;
     } catch (error) {
       console.error('❌ Error general en getTripReservationUser:', error);
@@ -329,16 +329,16 @@ export const cancelTrip = createAsyncThunk(
   'trips/cancelTrip',
   async (tripId: string, { rejectWithValue, dispatch }) => {
     try {
-      console.log('🔄 Iniciando cancelTrip para trip:', tripId);
+      
       
       // 1. Obtener información del usuario que reservó
-      console.log('📋 Obteniendo información del usuario...');
+      
       const reservationResult = await dispatch(getTripReservationUser(tripId));
       
-      console.log('📋 Resultado de getTripReservationUser:', reservationResult);
+      
       
       if (getTripReservationUser.rejected.match(reservationResult)) {
-        console.log('⚠️ No se encontró la reserva para este viaje, continuando con cancelación...');
+        
         // Continuar con la cancelación aunque no haya reserva
       }
 
@@ -349,12 +349,12 @@ export const cancelTrip = createAsyncThunk(
         const result = reservationResult.payload as any;
         reservationData = result.reservation;
         user = result.user;
-        console.log('👤 Usuario encontrado:', user);
-        console.log('📝 Reserva encontrada:', reservationData);
+        
+        
       }
 
       // 2. Actualizar estados del viaje y reserva
-      console.log('🔄 Actualizando estados...');
+      
       const updatePromises = [
         supabase
           .from('trips')
@@ -393,11 +393,11 @@ export const cancelTrip = createAsyncThunk(
         return rejectWithValue(reservationUpdate.error.message);
       }
 
-      console.log('✅ Estados actualizados correctamente');
+      
 
       // 3. Enviar correos de cancelación (solo si hay usuario y reserva)
       if (user && reservationData) {
-        console.log('📧 Preparando correos de cancelación...');
+        
         try {
           const emailData = {
             client_name: user.full_name,
@@ -417,13 +417,13 @@ export const cancelTrip = createAsyncThunk(
             service_date: reservationData.service_date
           };
 
-          console.log('📧 Datos del correo:', emailData);
+          
 
           // Enviar correos en paralelo
           const emailPromises = [];
 
           // Correo al cliente
-          console.log('📧 Enviando correo de cancelación al cliente:', user.email);
+          
           emailPromises.push(
             fetch('/api/email/send-simple', {
               method: 'POST',
@@ -440,7 +440,7 @@ export const cancelTrip = createAsyncThunk(
 
           // Correo al conductor (si existe)
           if (tripUpdate.data.driver?.email) {
-            console.log('📧 Enviando correo de cancelación al conductor:', tripUpdate.data.driver.email);
+            
             emailPromises.push(
               fetch('/api/email/send-simple', {
                 method: 'POST',
@@ -459,19 +459,19 @@ export const cancelTrip = createAsyncThunk(
           const emailResponses = await Promise.all(emailPromises);
           const emailResults = await Promise.all(emailResponses.map(response => response.json()));
 
-          console.log('📧 Resultados de correos de cancelación:', emailResults);
+          
 
           const clientEmailResult = emailResults[0];
           const driverEmailResult = emailResults[1];
 
           if (clientEmailResult?.success) {
-            console.log('✅ Correo de cancelación enviado exitosamente al cliente');
+            
           } else {
             console.error('❌ Error enviando correo al cliente:', clientEmailResult?.error);
           }
 
           if (driverEmailResult?.success) {
-            console.log('✅ Correo de cancelación enviado exitosamente al conductor');
+            
           } else if (tripUpdate.data.driver?.email) {
             console.error('❌ Error enviando correo al conductor:', driverEmailResult?.error);
           }
@@ -481,10 +481,10 @@ export const cancelTrip = createAsyncThunk(
           // No fallar todo el proceso por un error de correo
         }
       } else {
-        console.log('ℹ️ No hay reserva asociada, no se envían correos de cancelación');
+        
       }
 
-      console.log('✅ cancelTrip finalizado exitosamente');
+      
       return tripUpdate.data as Trip;
     } catch (error) {
       console.error('❌ Error general en cancelTrip:', error);
@@ -498,13 +498,13 @@ export const completeTrip = createAsyncThunk(
   'trips/completeTrip',
   async (tripId: string, { rejectWithValue, dispatch }) => {
     try {
-      console.log('🔄 Iniciando completeTrip para trip:', tripId);
+      
       
       // 1. Obtener información del usuario que reservó
-      console.log('📋 Obteniendo información del usuario...');
+      
       const reservationResult = await dispatch(getTripReservationUser(tripId));
       
-      console.log('📋 Resultado de getTripReservationUser:', reservationResult);
+      
       
       if (getTripReservationUser.rejected.match(reservationResult)) {
         console.error('❌ No se encontró la reserva para este viaje');
@@ -512,11 +512,11 @@ export const completeTrip = createAsyncThunk(
       }
 
       const { reservation, user } = reservationResult.payload as any;
-      console.log('👤 Usuario encontrado:', user);
-      console.log('📝 Reserva encontrada:', reservation);
+      
+      
 
       // 2. Actualizar estados del viaje y reserva
-      console.log('🔄 Actualizando estados...');
+      
       const [tripUpdate, reservationUpdate] = await Promise.all([
         supabase
           .from('trips')
@@ -546,10 +546,10 @@ export const completeTrip = createAsyncThunk(
         return rejectWithValue(reservationUpdate.error.message);
       }
 
-      console.log('✅ Estados actualizados correctamente');
+      
 
       // 3. Preparar datos de notificación y enviar correo de finalización
-      console.log('📧 Preparando correo de finalización...');
+      
       try {
         const ratingUrl = `${window.location.origin}/rating/${reservation.id}`;
 
@@ -571,8 +571,8 @@ export const completeTrip = createAsyncThunk(
           rating_url: ratingUrl
         };
 
-        console.log('📧 Datos del correo:', reservationData);
-        console.log('📧 Enviando correo a:', user.email);
+        
+        
 
         const emailResponse = await fetch('/api/email/send-simple', {
           method: 'POST',
@@ -587,10 +587,10 @@ export const completeTrip = createAsyncThunk(
         });
 
         const emailResult = await emailResponse.json();
-        console.log('📧 Resultado del correo:', emailResult);
+        
 
         if (emailResult.success) {
-          console.log('✅ Correo de finalización enviado exitosamente a:', user.email);
+          
         } else {
           console.error('❌ Error enviando correo:', emailResult.error);
         }
@@ -635,18 +635,18 @@ export const completeTrip = createAsyncThunk(
 
           const whatsappResult = await whatsappResponse.json();
           if (whatsappResult.success) {
-            console.log('✅ WhatsApp de finalización enviado a:', recipientPhone);
+            
           } else {
             console.error('❌ Error enviando WhatsApp de finalización:', whatsappResult.error || whatsappResult);
           }
         } else {
-          console.log('⚠️ No hay teléfono del cliente, se omite WhatsApp de finalización');
+          
         }
       } catch (whatsappError) {
         console.error('❌ Error en el proceso de WhatsApp:', whatsappError);
       }
 
-      console.log('✅ completeTrip finalizado exitosamente');
+      
       return tripUpdate.data as Trip;
     } catch (error) {
       console.error('❌ Error general en completeTrip:', error);

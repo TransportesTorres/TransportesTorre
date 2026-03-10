@@ -353,7 +353,7 @@ _Equipo Transportes Torres_`
         });
       }
 
-      console.log('✅ WhatsApp sent:', messageResponse.sid);
+      
 
       // Guardar log en base de datos
       await this.saveNotificationLog({
@@ -406,7 +406,7 @@ _Equipo Transportes Torres_`
     const shouldSendEmail = options?.sendEmail !== false;
     if (shouldSendEmail) {
       try {
-        console.log('📧 Enviando email...');
+        
         // Convertir datos al formato esperado por emailService
         const emailData = {
           ...data,
@@ -426,7 +426,7 @@ _Equipo Transportes Torres_`
         };
         
         if (emailResult.success) {
-          console.log('✅ Email enviado exitosamente');
+          
         } else {
           console.error('❌ Error enviando email:', emailResult.error);
         }
@@ -451,7 +451,7 @@ _Equipo Transportes Torres_`
     
     if (hasValidPhone && twilioConfig.isConfigured) {
       try {
-        console.log('📱 Enviando WhatsApp a:', recipientPhone);
+        
         const templates = this.getWhatsAppTemplates();
         const whatsappMessage = templates[templateName](data);
 
@@ -464,7 +464,7 @@ _Equipo Transportes Torres_`
         });
         
         if (results.whatsapp.success) {
-          console.log('✅ WhatsApp enviado exitosamente');
+          
         } else {
           console.error('❌ Error enviando WhatsApp:', results.whatsapp.error);
         }
@@ -478,8 +478,8 @@ _Equipo Transportes Torres_`
       }
     } else {
       const reason = !hasValidPhone ? 'Sin número de teléfono' : 'Twilio no configurado';
-      console.log('⚠️ WhatsApp omitido:', reason);
-      console.log('   Debug - Phone:', recipientPhone, 'Twilio configured:', twilioConfig.isConfigured);
+      
+      
     }
 
     return results;
